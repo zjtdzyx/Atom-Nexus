@@ -1,13 +1,38 @@
-
 openapi: 3.0.0
 info:
-  title: DID & VC 系统 API
-  description: API 文档，用于管理去中心化身份 (DID)、凭证 (VC)、权限、身份验证等。
+  title: Atom Nexus API
+  description: Atom Nexus 去中心化数字身份管理系统的完整API文档，包含用户身份管理、凭证管理、身份验证、权限控制等模块。
   version: 1.0.0
+servers:
+  - url: https://api.atomnexus.com/v1
+    description: 生产环境
+  - url: https://api-staging.atomnexus.com/v1
+    description: 测试环境
+tags:
+  - name: 用户身份管理
+    description: DID创建、查询、恢复等功能
+  - name: 凭证管理
+    description: VC凭证的签发、查看、撤销等功能
+  - name: 身份验证
+    description: 凭证和DID的验证功能
+  - name: 权限管理
+    description: 设置与查询数据访问权限
+  - name: 开发者接口
+    description: API密钥管理和SDK文档
+  - name: 系统管理
+    description: 管理员功能
+  - name: 数据存储
+    description: 去中心化存储相关功能
+  - name: 安全与加密
+    description: 密钥备份、恢复与零知识证明
 paths:
-  /did/create:
+  # 1. 用户身份管理模块
+  /api/did/register:
     post:
+      tags:
+        - 用户身份管理
       summary: 创建DID
+      description: 通过多种方式（邮箱、钱包、社交账号）创建去中心化身份
       requestBody:
         required: true
         content:
@@ -17,12 +42,23 @@ paths:
               properties:
                 email:
                   type: string
-                phone:
-                  type: string
+                  description: 用户邮箱（可选）
                 walletAddress:
                   type: string
+                  description: 钱包地址（可选）
+                oauthToken:
+                  type: string
+                  description: 社交登录Token（可选）
+                didMethod:
+                  type: string
+                  description: DID方法，如did:key、did:web、did:ethr等
+                  example: "did:ethr"
+              anyOf:
+                - required: [email]
+                - required: [walletAddress]
+                - required: [oauthToken]
       responses:
-        '200':
+        '201':
           description: DID创建成功
           content:
             application/json:
@@ -32,41 +68,46 @@ paths:
                   did:
                     type: string
                     example: "did:ethr:0x1234567890abcdef"
-  
-  /vc/issue:
-    post:
-      summary: 凭证签发
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userDid:
-                  type: string
-                  example: "did:ethr:0x1234567890abcdef"
-                credentialType:
-                  type: string
-                  example: "Degree"
-                issuer:
-                  type: string
-                  example: "University Name"
+                  didDocument:
+                    type: object
+                    description: DID文档
+                  recoveryOptions:
+                    type: object
+                    description: 恢复选项信息
+        '400':
+          description: 请求参数错误
+        '409':
+          description: 已存在相同的DID
+
+  /api/did/{did}:
+    get:
+      tags:
+        - 用户身份管理
+      summary: 查询DID
+      description: 获取DID的基础信息
+      parameters:
+        - name: did
+          in: path
+          required: true
+          schema:
+            type: string
+          description: DID标识符
       responses:
         '200':
-          description: VC凭证签发成功
+          description: 成功返回DID信息
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  credential:
-                    type: string
-                    example: "VC-abcdef123456"
+                $ref: '#/components/schemas/DIDInfo'
+        '404':
+          description: DID不存在
 
-  /did/verify:
+  /api/did/recover:
     post:
-      summary: DID验证
+      tags:
+        - 用户身份管理
+      summary: 恢复DID
+      description: 通过预设的恢复机制恢复用户的DID控制权
       requestBody:
         required: true
         content:
@@ -76,54 +117,37 @@ paths:
               properties:
                 did:
                   type: string
-                  example: "did:ethr:0x1234567890abcdef"
+                  description: 需要恢复的DID
+                recoveryCredential:
+                  type: string
+                  description: 恢复凭证
+                multiFactorCode:
+                  type: string
+                  description: 多因素验证码
       responses:
         '200':
-          description: DID验证成功
+          description: DID恢复成功
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  verified:
-                    type: boolean
-                    example: true
-  
-  /permissions/set:
-    post:
-      summary: 设置权限
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userDid:
-                  type: string
-                  example: "did:ethr:0x1234567890abcdef"
-                permissions:
-                  type: object
-                  additionalProperties:
-                    type: boolean
-                resource:
-                  type: string
-                  example: "degree-certificate"
-      responses:
-        '200':
-          description: 权限设置成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
+                  did:
+                    type: string
+                  newKeyPair:
+                    type: object
+                    description: 新的密钥对信息（加密存储）
+        '400':
+          description: 恢复信息无效
+        '404':
+          description: DID不存在
 
-  /vc/revoke:
+  /api/did/authenticate:
     post:
-      summary: 撤销凭证
+      tags:
+        - 用户身份管理
+      summary: 身份认证
+      description: 验证用户对DID的控制权
       requestBody:
         required: true
         content:
@@ -131,9 +155,121 @@ paths:
             schema:
               type: object
               properties:
-                credentialId:
+                did:
                   type: string
-                  example: "VC-abcdef123456"
+                  description: 用户DID
+                signedData:
+                  type: string
+                  description: 使用DID私钥签名的数据
+                challenge:
+                  type: string
+                  description: 认证挑战值
+      responses:
+        '200':
+          description: 认证成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    example: true
+                  authToken:
+                    type: string
+                    description: 认证令牌
+        '401':
+          description: 认证失败
+
+  # 2. 凭证管理模块
+  /api/vc/issue:
+    post:
+      tags:
+        - 凭证管理
+      summary: 签发凭证
+      description: 签发可验证凭证(VC)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                holderDid:
+                  type: string
+                  description: 持有者DID
+                  example: "did:ethr:0x1234567890abcdef"
+                issuerDid:
+                  type: string
+                  description: 签发者DID
+                credentialType:
+                  type: string
+                  description: 凭证类型
+                  example: "UniversityDegree"
+                claims:
+                  type: object
+                  description: 凭证声明内容
+                expirationDate:
+                  type: string
+                  format: date-time
+                  description: 过期时间
+      responses:
+        '201':
+          description: 凭证签发成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifiableCredential'
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权的签发请求
+
+  /api/vc/{vcId}:
+    get:
+      tags:
+        - 凭证管理
+      summary: 查看凭证
+      description: 获取特定凭证的详细信息
+      parameters:
+        - name: vcId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 凭证ID
+      responses:
+        '200':
+          description: 成功返回凭证信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifiableCredential'
+        '404':
+          description: 凭证不存在
+
+  /api/vc/revoke:
+    post:
+      tags:
+        - 凭证管理
+      summary: 撤销凭证
+      description: 撤销已签发的凭证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vcId:
+                  type: string
+                  description: 凭证ID
+                reason:
+                  type: string
+                  description: 撤销原因
+                issuerDid:
+                  type: string
+                  description: 签发者DID（用于验证撤销权限）
       responses:
         '200':
           description: 凭证撤销成功
@@ -145,8 +281,826 @@ paths:
                   success:
                     type: boolean
                     example: true
+                  revocationDate:
+                    type: string
+                    format: date-time
+        '401':
+          description: 无撤销权限
+        '404':
+          description: 凭证不存在
+
+  /api/vc/list:
+    get:
+      tags:
+        - 凭证管理
+      summary: 列出用户凭证
+      description: 获取用户所有的凭证列表
+      parameters:
+        - name: holderDid
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 持有者DID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: 每页记录数
+        - name: type
+          in: query
+          schema:
+            type: string
+          description: 筛选凭证类型
+      responses:
+        '200':
+          description: 成功返回凭证列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credentials:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VerifiableCredential'
+                  total:
+                    type: integer
+                    description: 总记录数
+                  page:
+                    type: integer
+                    description: 当前页码
+        '401':
+          description: 未授权
+
+  /api/vc/share:
+    post:
+      tags:
+        - 凭证管理
+      summary: 分享凭证
+      description: 生成凭证分享链接或二维码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vcId:
+                  type: string
+                  description: 凭证ID
+                shareType:
+                  type: string
+                  enum: [link, qrcode]
+                  description: 分享方式
+                expiration:
+                  type: integer
+                  description: 分享链接有效期（秒）
+                  default: 86400
+      responses:
+        '200':
+          description: 分享成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shareUrl:
+                    type: string
+                    description: 分享链接
+                  qrCodeData:
+                    type: string
+                    description: 二维码数据（Base64编码，shareType为qrcode时返回）
+                  expiration:
+                    type: string
+                    format: date-time
+                    description: 过期时间
+        '404':
+          description: 凭证不存在
+
+  # 3. 身份验证模块
+  /api/vc/verify:
+    post:
+      tags:
+        - 身份验证
+      summary: 验证凭证
+      description: 验证凭证的真实性和有效性
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vcData:
+                  type: object
+                  description: 凭证数据
+      responses:
+        '200':
+          description: 验证结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+                    description: 凭证是否有效
+                  issuer:
+                    type: string
+                    description: 签发者信息
+                  issuanceDate:
+                    type: string
+                    format: date-time
+                    description: 签发时间
+                  expirationDate:
+                    type: string
+                    format: date-time
+                    description: 过期时间
+                  revocationStatus:
+                    type: boolean
+                    description: 撤销状态
+        '400':
+          description: 请求参数错误
+
+  /api/did/verify:
+    post:
+      tags:
+        - 身份验证
+      summary: 验证DID真实性
+      description: 验证DID的真实性和有效性
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  description: 待验证的DID
+      responses:
+        '200':
+          description: 验证结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+                    description: DID是否有效
+                  didDocument:
+                    type: object
+                    description: DID文档
+        '400':
+          description: 无效的DID格式
+
+  /api/vc/verify-batch:
+    post:
+      tags:
+        - 身份验证
+      summary: 批量验证凭证
+      description: 同时验证多个凭证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vcDataList:
+                  type: array
+                  description: 凭证数据列表
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: 批量验证结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        vcId:
+                          type: string
+                          description: 凭证ID
+                        isValid:
+                          type: boolean
+                          description: 验证结果
+                        reason:
+                          type: string
+                          description: 验证结果说明
+        '400':
+          description: 请求参数错误
+
+  # 4. 权限管理模块
+  /api/permissions/set:
+    post:
+      tags:
+        - 权限管理
+      summary: 设置凭证权限
+      description: 设置凭证的访问权限
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vcId:
+                  type: string
+                  description: 凭证ID
+                accessType:
+                  type: string
+                  enum: [one-time, limited-time, restricted]
+                  description: 访问类型
+                expirationTime:
+                  type: string
+                  format: date-time
+                  description: 访问权限过期时间
+                allowedViewers:
+                  type: array
+                  items:
+                    type: string
+                  description: 允许查看的DID列表
+                selectiveDisclosure:
+                  type: object
+                  description: 选择性披露的字段设置
+      responses:
+        '200':
+          description: 权限设置成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 无设置权限
+
+  /api/permissions/{vcId}:
+    get:
+      tags:
+        - 权限管理
+      summary: 查询权限设置
+      description: 获取凭证的权限设置
+      parameters:
+        - name: vcId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 凭证ID
+      responses:
+        '200':
+          description: 权限设置信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSettings'
+        '404':
+          description: 凭证不存在
+
+  /api/permissions/audit:
+    get:
+      tags:
+        - 权限管理
+      summary: 查看访问日志
+      description: 获取用户凭证的访问日志
+      parameters:
+        - name: holderDid
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 用户DID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: 每页记录数
+      responses:
+        '200':
+          description: 访问日志
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AccessLog'
+                  total:
+                    type: integer
+                    description: 总记录数
+                  page:
+                    type: integer
+                    description: 当前页码
+        '401':
+          description: 未授权
+
+  # 5. 开发者接口模块
+  /api/dev/api-key:
+    post:
+      tags:
+        - 开发者接口
+      summary: 获取API Key
+      description: 开发者申请API密钥
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                developerName:
+                  type: string
+                  description: 开发者名称
+                email:
+                  type: string
+                  description: 开发者邮箱
+                applicationDescription:
+                  type: string
+                  description: 应用描述
+                callbackUrl:
+                  type: string
+                  description: 回调URL
+      responses:
+        '201':
+          description: API密钥创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apiKey:
+                    type: string
+                    description: API密钥
+                  apiSecret:
+                    type: string
+                    description: API密钥密文（仅首次创建时返回）
+        '400':
+          description: 请求参数错误
+
+  /api/dev/sdk-docs:
+    get:
+      tags:
+        - 开发者接口
+      summary: 查询SDK文档
+      description: 获取SDK集成文档
+      parameters:
+        - name: sdkType
+          in: query
+          schema:
+            type: string
+            enum: [js, python, java, csharp]
+          description: SDK类型
+      responses:
+        '200':
+          description: SDK文档信息
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  docUrl:
+                    type: string
+                    description: 文档URL
+                  sdkVersion:
+                    type: string
+                    description: SDK版本
+                  exampleCode:
+                    type: string
+                    description: 示例代码
+
+  # 6. 系统管理后台
+  /api/admin/login:
+    post:
+      tags:
+        - 系统管理
+      summary: 管理员登录
+      description: 系统管理员登录
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: 管理员用户名
+                password:
+                  type: string
+                  description: 管理员密码
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: 认证令牌
+                  expiresIn:
+                    type: integer
+                    description: 令牌有效期（秒）
+        '401':
+          description: 登录失败
+
+  /api/admin/users:
+    get:
+      tags:
+        - 系统管理
+      summary: 用户管理
+      description: 获取系统用户列表
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: 每页记录数
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 搜索关键词
+      responses:
+        '200':
+          description: 用户列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+                    description: 总记录数
+                  page:
+                    type: integer
+                    description: 当前页码
+        '401':
+          description: 未授权
+
+  /api/admin/vcs:
+    get:
+      tags:
+        - 系统管理
+      summary: 凭证管理
+      description: 获取系统凭证列表
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 页码
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: 每页记录数
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: 搜索关键词
+      responses:
+        '200':
+          description: 凭证列表
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credentials:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VerifiableCredential'
+                  total:
+                    type: integer
+                    description: 总记录数
+                  page:
+                    type: integer
+                    description: 当前页码
+        '401':
+          description: 未授权
+
+  /api/admin/stats:
+    get:
+      tags:
+        - 系统管理
+      summary: 系统统计
+      description: 获取系统使用统计数据
+      parameters:
+        - name: timeRange
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, year]
+            default: month
+          description: 时间范围
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 开始日期
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 结束日期
+      responses:
+        '200':
+          description: 统计数据
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userStats:
+                    type: object
+                    description: 用户统计
+                  vcStats:
+                    type: object
+                    description: 凭证统计
+                  verificationStats:
+                    type: object
+                    description: 验证统计
+        '401':
+          description: 未授权
+
+  # 7. 数据存储模块
+  /api/storage/sync-status:
+    get:
+      tags:
+        - 数据存储
+      summary: 数据同步状态
+      description: 获取DID或VC的IPFS/Ceramic同步状态
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: DID或VC ID
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [did, vc]
+          description: ID类型
+      responses:
+        '200':
+          description: 同步状态
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  syncStatus:
+                    type: string
+                    enum: [synced, syncing, failed]
+                    description: 同步状态
+                  lastSync:
+                    type: string
+                    format: date-time
+                    description: 最后同步时间
+                  ipfsCid:
+                    type: string
+                    description: IPFS CID
+                  ceramicStreamId:
+                    type: string
+                    description: Ceramic Stream ID
+        '404':
+          description: ID不存在
+
+  /api/storage/link/{vcId}:
+    get:
+      tags:
+        - 数据存储
+      summary: 获取存储链接
+      description: 获取凭证在去中心化存储中的链接
+      parameters:
+        - name: vcId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: 凭证ID
+      responses:
+        '200':
+          description: 存储链接
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ipfsLink:
+                    type: string
+                    description: IPFS链接
+                  ceramicLink:
+                    type: string
+                    description: Ceramic链接
+        '404':
+          description: 凭证不存在
+
+  # 8. 安全与加密模块
+  /api/security/backup-keys:
+    post:
+      tags:
+        - 安全与加密
+      summary: 备份加密密钥
+      description: 安全备份用户的加密密钥
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  description: 用户DID
+                encryptedKeys:
+                  type: string
+                  description: 加密后的密钥数据
+                backupType:
+                  type: string
+                  enum: [cloud, social, local]
+                  description: 备份类型
+      responses:
+        '200':
+          description: 备份成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  backupId:
+                    type: string
+                    description: 备份ID
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权
+
+  /api/security/recover-keys:
+    post:
+      tags:
+        - 安全与加密
+      summary: 恢复加密密钥
+      description: 恢复用户的加密密钥
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  description: 用户DID
+                recoveryCredential:
+                  type: string
+                  description: 恢复凭证
+                backupId:
+                  type: string
+                  description: 备份ID
+      responses:
+        '200':
+          description: 恢复成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  encryptedKeys:
+                    type: string
+                    description: 加密后的密钥数据
+        '400':
+          description: 请求参数错误
+        '401':
+          description: 未授权
+
+  /api/security/zk-proof:
+    post:
+      tags:
+        - 安全与加密
+      summary: 零知识验证
+      description: 使用零知识证明技术验证凭证而不泄露具体信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proofType:
+                  type: string
+                  description: 证明类型
+                  example: "age-verification"
+                vcId:
+                  type: string
+                  description: 凭证ID
+                proofRequest:
+                  type: object
+                  description: 证明请求数据
+      responses:
+        '200':
+          description: 验证结果
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verified:
+                    type: boolean
+                    description: 验证结果
+                  proof:
+                    type: string
+                    description: 证明数据
+        '400':
+          description: 请求参数错误
+
 components:
   schemas:
+    DIDInfo:
+      type: object
+      properties:
+        did:
+          type: string
+          description: DID标识符
+          example: "did:ethr:0x1234567890abcdef"
+        didMethod:
+          type: string
+          description: DID方法
+          example: "did:ethr"
+        controller:
+          type: string
+          description: DID控制者
+        created:
+          type: string
+          format: date-time
+          description: 创建时间
+        updated:
+          type: string
+          format: date-time
+          description: 更新时间
+        verificationMethods:
+          type: array
+          items:
+            type: object
+          description: 验证方法列表
+
     User:
       type: object
       properties:
@@ -156,27 +1110,126 @@ components:
         email:
           type: string
           description: 用户邮箱
-        phone:
+        displayName:
           type: string
-          description: 用户手机号
-    Credential:
+          description: 显示名称
+        registrationDate:
+          type: string
+          format: date-time
+          description: 注册时间
+        lastActive:
+          type: string
+          format: date-time
+          description: 最后活跃时间
+        statusVerified:
+          type: boolean
+          description: 验证状态
+
+    VerifiableCredential:
       type: object
       properties:
         id:
           type: string
           description: 凭证ID
+          example: "urn:uuid:12345678-1234-5678-1234-567812345678"
         type:
-          type: string
+          type: array
+          items:
+            type: string
           description: 凭证类型
+          example: ["VerifiableCredential", "UniversityDegree"]
         issuer:
           type: string
-          description: 凭证签发者
-    Permission:
+          description: 签发者DID
+        holder:
+          type: string
+          description: 持有者DID
+        issuanceDate:
+          type: string
+          format: date-time
+          description: 签发时间
+        expirationDate:
+          type: string
+          format: date-time
+          description: 过期时间
+        credentialSubject:
+          type: object
+          description: 凭证主体内容
+        proof:
+          type: object
+          description: 凭证证明
+
+    PermissionSettings:
       type: object
       properties:
-        resource:
+        vcId:
           type: string
-          description: 资源名称
-        access:
+          description: 凭证ID
+        accessType:
           type: string
-          description: 访问类型 (read/write)
+          description: 访问类型
+          enum: [one-time, limited-time, restricted]
+        expirationTime:
+          type: string
+          format: date-time
+          description: 访问权限过期时间
+        allowedViewers:
+          type: array
+          items:
+            type: string
+          description: 允许查看的DID列表
+        selectiveDisclosure:
+          type: object
+          description: 选择性披露的字段设置
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+        updatedAt:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    AccessLog:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 日志ID
+        vcId:
+          type: string
+          description: 凭证ID
+        accessorDid:
+          type: string
+          description: 访问者DID
+        accessTime:
+          type: string
+          format: date-time
+          description: 访问时间
+        accessType:
+          type: string
+          description: 访问类型
+          enum: [view, verify, share]
+        accessResult:
+          type: boolean
+          description: 访问结果
+        ipAddress:
+          type: string
+          description: IP地址
+        userAgent:
+          type: string
+          description: 用户代理信息
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []

@@ -1,46 +1,93 @@
-# Node.js
+# Node依赖
 node_modules/
-dist/
+.pnpm-store/
+.npm
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.yarn-integrity
+
+# 环境变量
 .env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# 构建输出
+dist/
+dist-ssr/
+build/
+out/
+lib/
+es/
+umd/
 
-# Editor
+# TypeScript
+*.tsbuildinfo
+*.js.map
+*.d.ts
+
+# 编译后的JavaScript (保留配置文件)
+*.js
+!jest.config.js
+!commitlint.config.js
+!.eslintrc.js
+!prettier.config.js
+!babel.config.js
+!rollup.config.js
+!webpack.config.js
+!vite.config.js
+
+# 特定子项目忽略
+# Backend
+backend/dist/
+# Frontend
+frontend/dist/
+*.local
+# SDK
+sdk/dist/
+sdk/lib/
+sdk/es/
+sdk/umd/
+# Smart Contracts
+smart-contracts/artifacts/
+smart-contracts/cache/
+smart-contracts/typechain/
+smart-contracts/typechain-types/
+smart-contracts/out/
+smart-contracts/forge-cache/
+smart-contracts/.openzeppelin/
+smart-contracts/deployments/localhost/
+smart-contracts/deployments/hardhat/
+smart-contracts/gas-report.txt
+
+# 测试和覆盖率
+coverage/
+.nyc_output/
+coverage.json
+
+# 编辑器
 .vscode/
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
-# OS
+# 系统文件
 .DS_Store
 Thumbs.db
 
-# Build
-build/
-out/
+# 项目特定文件
+.vercel
+.netlify
 .next/
 .nuxt/
-.cache/
-coverage/
-
-# Package managers
-.npm
-.pnpm-store/
-.yarn-integrity
-yarn.lock
-package-lock.json
-pnpm-lock.yaml
-
-# Project specific
-.vercel
-.netlify 
+.cache/ 
