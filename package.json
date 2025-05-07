@@ -1,21 +1,25 @@
 {
-  "name": "idvault-graduation-project",
+  "name": "atom-nexus",
   "version": "0.1.0",
   "private": true,
   "description": "去中心化数字身份管理系统 - 毕业设计项目",
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "sdk",
+    "smart-contracts"
   ],
   "scripts": {
-    "dev:frontend": "cd frontend && pnpm dev",
-    "dev:backend": "cd backend && pnpm start:dev",
-    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
-    "build:frontend": "cd frontend && pnpm build",
-    "build:backend": "cd backend && pnpm build",
-    "build": "pnpm build:frontend && pnpm build:backend",
-    "test": "pnpm -r test",
-    "lint": "pnpm -r lint"
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "format": "pnpm -r run format",
+    "clean": "powershell -File ./clean.ps1",
+    "frontend:dev": "pnpm --filter frontend dev",
+    "backend:dev": "pnpm --filter backend start:dev",
+    "sdk:build": "pnpm --filter @atom-nexus/sdk build",
+    "contracts:compile": "pnpm --filter atom-nexus-smart-contracts compile"
   },
   "keywords": [
     "DID",
@@ -32,6 +36,9 @@
   },
   "packageManager": "pnpm@8.6.0",
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0"
   }
 } 
