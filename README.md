@@ -34,7 +34,7 @@ IDVault 是一个面向个人和企业的去中心化数字身份管理系统，
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/idvault-graduation-project.git
+git clone https://github.com/zjtdzyx/idvault-graduation-project.git
 
 # 进入前端或后端目录分别安装依赖
 cd frontend && pnpm install
@@ -57,7 +57,7 @@ cd backend && pnpm install
 
 ## ✨ 开发计划
 
-请查看 [GitHub Project看板](https://github.com/yourusername/idvault-graduation-project/projects/1)
+请查看 [GitHub Project看板](https://github.com/zjtdzyx/idvault-graduation-project/projects/1)
 
 ## 🤝 许可协议
 
