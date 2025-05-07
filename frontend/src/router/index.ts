@@ -87,6 +87,47 @@ const routes: RouteRecordRaw[] = [
         name: 'Apps',
         component: () => import('../pages/Apps.vue'),
       },
+      // 管理模块路由配置
+      {
+        path: 'admin/users',
+        name: 'AdminUsers',
+        component: () => import('../pages/admin/UserManagementPage.vue'),
+        meta: {
+          title: '用户管理',
+          requiresAuth: true,
+          requiresAdmin: true,
+        },
+      },
+      {
+        path: 'admin/credentials',
+        name: 'AdminCredentials',
+        component: () => import('../pages/admin/CredentialRecordsPage.vue'),
+        meta: {
+          title: '凭证记录',
+          requiresAuth: true,
+          requiresAdmin: true,
+        },
+      },
+      {
+        path: 'admin/permissions',
+        name: 'AdminPermissions',
+        component: () => import('../pages/admin/PermissionManagementPage.vue'),
+        meta: {
+          title: '权限管理',
+          requiresAuth: true,
+          requiresAdmin: true,
+        },
+      },
+      {
+        path: 'admin/stats',
+        name: 'AdminStats',
+        component: () => import('../pages/admin/SystemStatsPage.vue'),
+        meta: {
+          title: '系统统计',
+          requiresAuth: true,
+          requiresAdmin: true,
+        },
+      },
     ],
   },
   {
