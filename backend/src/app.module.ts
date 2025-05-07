@@ -5,6 +5,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { DeveloperModule } from './modules/developer/developer.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AdminModule } from './modules/admin/admin.module';
     PermissionModule,
     DeveloperModule,
     AdminModule,
+    StorageModule,
   ],
   controllers: [],
   providers: [],
