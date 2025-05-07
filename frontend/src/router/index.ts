@@ -46,6 +46,33 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/CredentialDetail.vue'),
       },
       {
+        path: 'permissions/set',
+        name: 'PermissionSet',
+        component: () => import('../pages/permissions/PermissionSetPage.vue'),
+        meta: {
+          title: '权限设置',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'permissions/audit',
+        name: 'PermissionAudit',
+        component: () => import('../pages/permissions/PermissionAuditPage.vue'),
+        meta: {
+          title: '权限审计',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'permissions/:did',
+        name: 'DidPermission',
+        component: () => import('../pages/permissions/DidPermissionPage.vue'),
+        meta: {
+          title: 'DID权限',
+          requiresAuth: true,
+        },
+      },
+      {
         path: 'permissions',
         name: 'Permissions',
         component: () => import('../pages/Permissions.vue'),
