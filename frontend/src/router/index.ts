@@ -87,6 +87,25 @@ const routes: RouteRecordRaw[] = [
         name: 'Apps',
         component: () => import('../pages/Apps.vue'),
       },
+      // 用户模块路由配置
+      {
+        path: 'user/profile',
+        name: 'UserProfile',
+        component: () => import('../pages/user/ProfilePage.vue'),
+        meta: {
+          title: '用户资料',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'user/login',
+        name: 'UserLogin',
+        component: () => import('../pages/user/LoginPage.vue'),
+        meta: {
+          title: '用户登录',
+          requiresAuth: false,
+        },
+      },
       // 存储模块路由配置
       {
         path: 'storage',
