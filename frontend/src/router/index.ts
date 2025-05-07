@@ -87,6 +87,47 @@ const routes: RouteRecordRaw[] = [
         name: 'Apps',
         component: () => import('../pages/Apps.vue'),
       },
+      // 存储模块路由配置
+      {
+        path: 'storage',
+        name: 'StorageUpload',
+        component: () => import('../pages/storage/UploadPage.vue'),
+        meta: {
+          title: '上传数据',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'storage/upload',
+        redirect: '/storage',
+      },
+      {
+        path: 'storage/view',
+        name: 'StorageDataView',
+        component: () => import('../pages/storage/DataViewPage.vue'),
+        meta: {
+          title: '数据访问',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'storage/:cid',
+        name: 'StorageDataDetail',
+        component: () => import('../pages/storage/DataViewPage.vue'),
+        meta: {
+          title: '数据详情',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'storage/indexes',
+        name: 'StorageIndexes',
+        component: () => import('../pages/storage/IndexesPage.vue'),
+        meta: {
+          title: '索引记录',
+          requiresAuth: true,
+        },
+      },
       // 管理模块路由配置
       {
         path: 'admin/users',
