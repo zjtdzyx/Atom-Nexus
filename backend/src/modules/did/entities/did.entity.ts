@@ -1,9 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryColumn, CreateDateColumn, OneToMany, OneToOne } from 'typeorm';
 import { Credential } from '../../credential/entities/credential.entity';
+import { DidDocument } from './did-document.entity';
 
 @Entity()
 export class Did {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   id: string;
 
   @Column({ nullable: true })
@@ -23,4 +24,7 @@ export class Did {
 
   @OneToMany(() => Credential, (credential) => credential.owner)
   credentials: Credential[];
+
+  @OneToOne(() => DidDocument, (document) => document.did)
+  document: DidDocument;
 }

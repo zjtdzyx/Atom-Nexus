@@ -1135,7 +1135,7 @@ components:
         type:
           type: array
           items:
-            type: string
+          type: string
           description: 凭证类型
           example: ["VerifiableCredential", "UniversityDegree"]
         issuer:

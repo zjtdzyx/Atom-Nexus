@@ -33,6 +33,23 @@ export class CredentialResponse {
   transactionHash?: string;
 }
 
+export class ProofModel {
+  @ApiProperty({ description: '证明类型' })
+  type: string;
+
+  @ApiProperty({ description: '证明创建时间' })
+  created: string;
+
+  @ApiProperty({ description: '验证方法' })
+  verificationMethod: string;
+
+  @ApiProperty({ description: '证明目的' })
+  proofPurpose: string;
+
+  @ApiProperty({ description: '签名值' })
+  signatureValue: string;
+}
+
 export class CredentialDetailResponse extends CredentialResponse {
   @ApiProperty({ description: '凭证主题完整信息' })
   subject: Record<string, any>;
@@ -40,23 +57,8 @@ export class CredentialDetailResponse extends CredentialResponse {
   @ApiProperty({ description: '凭证声明内容' })
   claims: Record<string, any>;
 
-  @ApiProperty({ description: '凭证证明信息' })
-  proof: {
-    @ApiProperty({ description: '证明类型' })
-    type: string;
-
-    @ApiProperty({ description: '证明创建时间' })
-    created: string;
-
-    @ApiProperty({ description: '验证方法' })
-    verificationMethod: string;
-
-    @ApiProperty({ description: '证明目的' })
-    proofPurpose: string;
-
-    @ApiProperty({ description: '签名值' })
-    signatureValue: string;
-  };
+  @ApiProperty({ description: '凭证证明信息', type: ProofModel })
+  proof: ProofModel;
 }
 
 export class CredentialShareResponse {
@@ -97,4 +99,4 @@ export class RevokeCredentialResponse {
 
   @ApiProperty({ description: '链上撤销交易哈希', required: false })
   transactionHash?: string;
-} 
+}

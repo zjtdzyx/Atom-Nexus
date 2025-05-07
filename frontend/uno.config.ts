@@ -1,5 +1,5 @@
-import { defineConfig } from 'unocss'
-import { presetUno, presetIcons, presetAttributify } from 'unocss'
+import { defineConfig } from 'unocss';
+import { presetUno, presetIcons, presetAttributify } from 'unocss';
 
 export default defineConfig({
   presets: [
@@ -7,36 +7,61 @@ export default defineConfig({
     presetIcons({
       scale: 1.2,
       extraProperties: {
-        'display': 'inline-block',
-        'vertical-align': 'middle'
-      }
+        display: 'inline-block',
+        'vertical-align': 'middle',
+      },
     }),
-    presetAttributify()
+    presetAttributify(),
   ],
   theme: {
     colors: {
-      // 定义主题色
-      primary: {
-        DEFAULT: '#4f46e5',
-        50: '#eef2ff',
-        100: '#e0e7ff',
-        200: '#c7d2fe',
-        300: '#a5b4fc',
-        400: '#818cf8',
-        500: '#6366f1',
-        600: '#4f46e5',
-        700: '#4338ca',
-        800: '#3730a3',
-        900: '#312e81'
-      }
-    }
+      // 主题色系
+      primary: '#1e1e2f', // 深太空蓝
+      neon: '#00e0d1', // 霓虹青绿
+      violet: '#9b4dca', // 紫罗兰
+      metal: '#b1b3b8', // 钛金属银
+      darkbg: '#121212', // 深灰色背景
+      textlight: '#ffffff', // 白色文字
+      textgray: '#e0e0e0', // 浅灰文字
+    },
+    fontFamily: {
+      sans: ['Inter', 'Satoshi', 'system-ui', 'sans-serif'],
+    },
+    fontSize: {
+      'main-title': '48px',
+      'sub-title': '32px',
+      body: '16px',
+    },
+    maxWidth: {
+      content: '1200px',
+    },
   },
   shortcuts: {
-    // 常用组合样式
-    'btn': 'px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer',
-    'btn-primary': 'btn bg-primary text-white hover:bg-primary-700 active:bg-primary-800',
-    'btn-outline': 'btn border border-gray-300 hover:bg-gray-100 active:bg-gray-200',
-    'input': 'px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50',
-    'card': 'bg-white rounded-xl shadow-md p-4'
-  }
-}) 
+    // 按钮
+    btn: 'px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer',
+    'btn-primary':
+      'btn bg-neon text-white hover:bg-primary active:transform active:scale-98 active:translate-y-0.5',
+    'btn-secondary':
+      'btn bg-metal text-primary hover:bg-violet hover:text-white active:transform active:scale-98 active:translate-y-0.5',
+
+    // 输入框
+    input:
+      'px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-neon/50',
+
+    // 卡片组件
+    card: 'bg-white/10 backdrop-blur-sm rounded-xl shadow-md p-4',
+
+    // 布局
+    container: 'mx-auto px-4 max-w-content',
+
+    // 导航栏
+    navbar:
+      'fixed top-0 left-0 right-0 z-50 bg-primary/80 backdrop-blur-md transition-all duration-300',
+    'nav-link': 'px-3 py-2 text-textgray hover:text-textlight transition-colors duration-200',
+
+    // 文本样式
+    title: 'text-main-title font-bold text-textlight',
+    subtitle: 'text-sub-title font-medium text-textlight',
+    text: 'text-body text-textgray',
+  },
+});

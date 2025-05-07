@@ -1,79 +1,115 @@
 <template>
-  <div class="flex h-screen">
-    <!-- 侧边栏 -->
-    <div class="w-64 bg-gray-900 text-white">
-      <div class="p-4">
-        <div class="flex items-center justify-center mb-6">
-          <img src="../../public/atom-nexus-logo.png" alt="Atom Nexus" class="w-10 h-10 mr-2" />
-          <div class="text-2xl font-bold">Atom Nexus</div>
-        </div>
+  <div class="layout-wrapper">
+    <!-- 导航栏 -->
+    <Navbar :scrolled="isScrolled" />
 
-        <nav class="space-y-2">
-          <RouterLink to="/" class="nav-link" :class="{ active: currentRoute === '/' }">
-            <div class="i-carbon-dashboard mr-2"></div>仪表盘
-          </RouterLink>
+    <!-- 主要内容 -->
+    <main class="main-content">
+      <slot></slot>
+    </main>
 
-          <RouterLink to="/identity" class="nav-link" :class="{ active: currentRoute === '/identity' }">
-            <div class="i-carbon-user-profile mr-2"></div>身份管理
-          </RouterLink>
+    <!-- 页脚 -->
+    <footer class="footer py-12 bg-primary/90">
+      <div class="container">
+        <!-- Logo & 简介 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div class="col-span-1 md:col-span-1">
+            <div class="flex items-center mb-4">
+              <img src="../../public/atom-nexus-logo.png" alt="Atom Nexus" class="h-8 w-auto" />
+              <span class="ml-2 text-xl font-bold text-textlight">Atom Nexus</span>
+            </div>
+            <p class="text-textgray text-sm mb-4">
+              重新定义数字身份和数据主权，为去中心化世界提供安全、自主的身份解决方案
+            </p>
+            <div class="social-links flex space-x-3">
+              <a href="#" class="text-metal hover:text-neon">
+                <div class="i-carbon-logo-github text-2xl"></div>
+              </a>
+              <a href="#" class="text-metal hover:text-neon">
+                <div class="i-carbon-logo-twitter text-2xl"></div>
+              </a>
+              <a href="#" class="text-metal hover:text-neon">
+                <div class="i-carbon-logo-discord text-2xl"></div>
+              </a>
+              <a href="#" class="text-metal hover:text-neon">
+                <div class="i-carbon-logo-linkedin text-2xl"></div>
+              </a>
+            </div>
+          </div>
 
-          <RouterLink to="/credentials" class="nav-link" :class="{ active: currentRoute === '/credentials' }">
-            <div class="i-carbon-certificate mr-2"></div>凭证管理
-          </RouterLink>
+          <!-- 链接 -->
+          <div class="col-span-1">
+            <h3 class="text-lg font-semibold text-textlight mb-4">产品</h3>
+            <ul class="space-y-2">
+              <li><router-link to="/identity" class="text-textgray hover:text-neon text-sm">身份管理</router-link></li>
+              <li><router-link to="/credentials" class="text-textgray hover:text-neon text-sm">凭证管理</router-link></li>
+              <li><router-link to="/storage" class="text-textgray hover:text-neon text-sm">数据存储</router-link></li>
+              <li><router-link to="/security" class="text-textgray hover:text-neon text-sm">安全与隐私</router-link></li>
+            </ul>
+          </div>
 
-          <RouterLink to="/permissions" class="nav-link" :class="{ active: currentRoute === '/permissions' }">
-            <div class="i-carbon-password mr-2"></div>权限控制
-          </RouterLink>
+          <div class="col-span-1">
+            <h3 class="text-lg font-semibold text-textlight mb-4">开发者</h3>
+            <ul class="space-y-2">
+              <li><router-link to="/developer" class="text-textgray hover:text-neon text-sm">开发者中心</router-link></li>
+              <li><a href="#" class="text-textgray hover:text-neon text-sm">API 文档</a></li>
+              <li><a href="#" class="text-textgray hover:text-neon text-sm">SDK 下载</a></li>
+              <li><a href="#" class="text-textgray hover:text-neon text-sm">示例项目</a></li>
+            </ul>
+          </div>
 
-          <RouterLink to="/apps" class="nav-link" :class="{ active: currentRoute === '/apps' }">
-            <div class="i-carbon-application mr-2"></div>应用管理
-          </RouterLink>
-
-          <RouterLink to="/settings" class="nav-link" :class="{ active: currentRoute === '/settings' }">
-            <div class="i-carbon-settings mr-2"></div>设置
-          </RouterLink>
-        </nav>
-      </div>
-    </div>
-
-    <!-- 主内容区 -->
-    <div class="flex-1 overflow-auto bg-gray-100">
-      <!-- 顶部导航 -->
-      <header class="bg-white shadow-sm p-4">
-        <div class="flex justify-end items-center">
-          <div class="px-4 py-2 rounded-full bg-gray-100 flex items-center">
-            <div class="i-carbon-user-avatar text-xl mr-2"></div>
-            <span>用户名</span>
+          <div class="col-span-1">
+            <h3 class="text-lg font-semibold text-textlight mb-4">公司</h3>
+            <ul class="space-y-2">
+              <li><router-link to="/about" class="text-textgray hover:text-neon text-sm">关于我们</router-link></li>
+              <li><router-link to="/contact" class="text-textgray hover:text-neon text-sm">联系我们</router-link></li>
+              <li><router-link to="/privacy" class="text-textgray hover:text-neon text-sm">隐私政策</router-link></li>
+              <li><router-link to="/terms" class="text-textgray hover:text-neon text-sm">服务条款</router-link></li>
+            </ul>
           </div>
         </div>
-      </header>
 
-      <!-- 页面内容 -->
-      <main class="p-6">
-        <RouterView />
-      </main>
-    </div>
+        <!-- 版权 -->
+        <div class="border-t border-gray-800 pt-6 mt-6 text-sm text-textgray text-center">
+          <p>© {{ new Date().getFullYear() }} Atom Nexus. 保留所有权利。</p>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useRoute, RouterLink, RouterView } from 'vue-router'
+  import { ref, onMounted, onUnmounted } from 'vue';
+  import Navbar from '@/components/layout/Navbar.vue';
 
-  const route = useRoute()
-  const currentRoute = computed(() => route.path)
+  // 监听滚动以改变导航栏样式
+  const isScrolled = ref(false);
+
+  const handleScroll = () => {
+    isScrolled.value = window.scrollY > 50;
+  };
+
+  onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+  });
 </script>
 
 <style scoped>
-  .nav-link {
-    @apply flex items-center px-4 py-2 rounded-lg transition-colors duration-200;
+  .layout-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
-  .nav-link:hover {
-    @apply bg-gray-800;
+  .main-content {
+    flex: 1;
   }
 
-  .nav-link.active {
-    @apply bg-primary text-white;
+  .footer {
+    background-color: var(--color-primary);
   }
 </style>

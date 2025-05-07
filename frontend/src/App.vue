@@ -1,14 +1,15 @@
 <template>
-  <div class="app-container">
-    <RouterView />
-  </div>
+  <MainLayout>
+    <router-view />
+  </MainLayout>
 </template>
 
 <script setup lang="ts">
-  import { RouterView } from 'vue-router'
+  import MainLayout from '@/layouts/MainLayout.vue';
 </script>
 
 <style>
+  @import '@/styles/global.css';
 
   html,
   body {

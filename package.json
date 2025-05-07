@@ -17,7 +17,7 @@
     "format": "pnpm -r run format",
     "clean": "powershell -File ./clean.ps1",
     "frontend:dev": "pnpm --filter frontend dev",
-    "backend:dev": "pnpm --filter backend start:dev",
+    "backend:dev": "pnpm --filter atom-nexus-backend start:dev",
     "sdk:build": "pnpm --filter @atom-nexus/sdk build",
     "contracts:compile": "pnpm --filter atom-nexus-smart-contracts compile"
   },

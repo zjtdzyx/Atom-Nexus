@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsOptional, IsObject, ValidateNested, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsObject,
+  ValidateNested,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum CredentialType {
@@ -25,14 +32,16 @@ class SubjectData {
   @ApiProperty({ description: '其他自定义属性', required: false, type: 'object' })
   @IsObject()
   @IsOptional()
+  additionalData?: Record<string, any>;
+
   [key: string]: any;
 }
 
 export class IssueCredentialDto {
-  @ApiProperty({ 
-    description: '凭证类型', 
+  @ApiProperty({
+    description: '凭证类型',
     enum: CredentialType,
-    example: CredentialType.IDENTITY
+    example: CredentialType.IDENTITY,
   })
   @IsEnum(CredentialType)
   @IsNotEmpty()
@@ -49,10 +58,10 @@ export class IssueCredentialDto {
   @IsNotEmpty()
   subject: SubjectData;
 
-  @ApiProperty({ 
-    description: '凭证有效期(ISO日期字符串)', 
+  @ApiProperty({
+    description: '凭证有效期(ISO日期字符串)',
     required: false,
-    example: '2025-12-31T23:59:59Z'
+    example: '2025-12-31T23:59:59Z',
   })
   @IsString()
   @IsOptional()
@@ -66,4 +75,4 @@ export class IssueCredentialDto {
   @ApiProperty({ description: '凭证上链存证', default: true })
   @IsOptional()
   storeOnChain?: boolean;
-} 
+}

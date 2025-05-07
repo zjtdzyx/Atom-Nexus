@@ -1,0 +1,112 @@
+/* 导入字体 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* 颜色变量 */
+  --color-primary: #1e1e2f;
+  --color-neon: #00e0d1;
+  --color-violet: #9b4dca;
+  --color-metal: #b1b3b8;
+  --color-darkbg: #121212;
+  --color-text-light: #ffffff;
+  --color-text-gray: #e0e0e0;
+  
+  /* 字体大小 */
+  --font-main-title: 48px;
+  --font-sub-title: 32px;
+  --font-body: 16px;
+  
+  /* 过渡时间 */
+  --transition-fast: 200ms;
+  --transition-normal: 300ms;
+  --transition-slow: 500ms;
+}
+
+/* 基础重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: 'Inter', 'Satoshi', system-ui, sans-serif;
+  background-color: var(--color-darkbg);
+  color: var(--color-text-light);
+  min-height: 100vh;
+  scroll-behavior: smooth;
+}
+
+/* 基础排版 */
+h1 {
+  font-size: var(--font-main-title);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: var(--font-sub-title);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+p {
+  font-size: var(--font-body);
+  line-height: 1.6;
+  color: var(--color-text-gray);
+}
+
+/* 按钮基础样式 */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+/* 链接基础样式 */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-fast);
+}
+
+/* 渐变动画效果 */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 滚动条自定义 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neon);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-violet);
+}
+
+/* 适配移动端 */
+@media (max-width: 768px) {
+  :root {
+    --font-main-title: 36px;
+    --font-sub-title: 24px;
+    --font-body: 14px;
+  }
+} 

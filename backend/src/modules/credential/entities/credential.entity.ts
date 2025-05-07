@@ -5,13 +5,13 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Did } from '../../did/entities/did.entity';
-
-export enum CredentialStatus {
-  ACTIVE = 'active',
-  REVOKED = 'revoked',
-}
+import { CredentialProof } from './credential-proof.entity';
+import { CredentialShare } from './credential-share.entity';
+import { CredentialStatus } from '../models/credential.model';
 
 @Entity()
 export class Credential {
@@ -38,9 +38,21 @@ export class Credential {
   })
   status: CredentialStatus;
 
-  @Column()
+  @CreateDateColumn()
   issuedAt: Date;
 
   @Column({ nullable: true })
+  expirationDate: Date;
+
+  @Column({ nullable: true })
   revokedAt: Date;
+
+  @Column({ nullable: true })
+  transactionHash: string;
+
+  @OneToOne(() => CredentialProof, (proof) => proof.credential)
+  proof: CredentialProof;
+
+  @OneToMany(() => CredentialShare, (share) => share.credential)
+  shares: CredentialShare[];
 }
