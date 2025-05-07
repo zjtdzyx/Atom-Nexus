@@ -1,0 +1,182 @@
+
+openapi: 3.0.0
+info:
+  title: DID & VC 系统 API
+  description: API 文档，用于管理去中心化身份 (DID)、凭证 (VC)、权限、身份验证等。
+  version: 1.0.0
+paths:
+  /did/create:
+    post:
+      summary: 创建DID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                phone:
+                  type: string
+                walletAddress:
+                  type: string
+      responses:
+        '200':
+          description: DID创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  did:
+                    type: string
+                    example: "did:ethr:0x1234567890abcdef"
+  
+  /vc/issue:
+    post:
+      summary: 凭证签发
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userDid:
+                  type: string
+                  example: "did:ethr:0x1234567890abcdef"
+                credentialType:
+                  type: string
+                  example: "Degree"
+                issuer:
+                  type: string
+                  example: "University Name"
+      responses:
+        '200':
+          description: VC凭证签发成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  credential:
+                    type: string
+                    example: "VC-abcdef123456"
+
+  /did/verify:
+    post:
+      summary: DID验证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                  example: "did:ethr:0x1234567890abcdef"
+      responses:
+        '200':
+          description: DID验证成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verified:
+                    type: boolean
+                    example: true
+  
+  /permissions/set:
+    post:
+      summary: 设置权限
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userDid:
+                  type: string
+                  example: "did:ethr:0x1234567890abcdef"
+                permissions:
+                  type: object
+                  additionalProperties:
+                    type: boolean
+                resource:
+                  type: string
+                  example: "degree-certificate"
+      responses:
+        '200':
+          description: 权限设置成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
+  /vc/revoke:
+    post:
+      summary: 撤销凭证
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                credentialId:
+                  type: string
+                  example: "VC-abcdef123456"
+      responses:
+        '200':
+          description: 凭证撤销成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        did:
+          type: string
+          description: 用户DID
+        email:
+          type: string
+          description: 用户邮箱
+        phone:
+          type: string
+          description: 用户手机号
+    Credential:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 凭证ID
+        type:
+          type: string
+          description: 凭证类型
+        issuer:
+          type: string
+          description: 凭证签发者
+    Permission:
+      type: object
+      properties:
+        resource:
+          type: string
+          description: 资源名称
+        access:
+          type: string
+          description: 访问类型 (read/write)

@@ -1,8 +1,8 @@
-# IDVault SDK
+# Atom Nexus SDK
 
 ## 简介
 
-IDVault SDK 是开发者工具包，为第三方应用提供便捷的接口，轻松集成去中心化身份（DID）与可验证凭证（VC）功能。
+Atom Nexus SDK 是开发者工具包，为第三方应用提供便捷的接口，轻松集成去中心化身份（DID）与可验证凭证（VC）功能。
 
 ## 主要功能
 
@@ -22,9 +22,9 @@ IDVault SDK 是开发者工具包，为第三方应用提供便捷的接口，�
 
 ```typescript
 // 初始化SDK
-import { IDVaultSDK } from '@idvault/sdk';
+import { AtomNexusSDK } from '@atom-nexus/sdk';
 
-const sdk = new IDVaultSDK({
+const sdk = new AtomNexusSDK({
   apiKey: 'YOUR_API_KEY',
   environment: 'development'
 });
@@ -62,16 +62,16 @@ const shareableLink = await sdk.credential.share({
 ### 安装
 
 ```bash
-npm install @idvault/sdk
+npm install @atom-nexus/sdk
 # 或
-pnpm add @idvault/sdk
+pnpm add @atom-nexus/sdk
 ```
 
 ### 配置
 
 ```typescript
 // 配置SDK
-const sdk = new IDVaultSDK({
+const sdk = new AtomNexusSDK({
   apiKey: 'YOUR_API_KEY',
   environment: 'production', // 'production' 或 'development'
   options: {
@@ -83,11 +83,31 @@ const sdk = new IDVaultSDK({
 
 ## API 文档
 
-详细的API文档请参见：
+详细的API接口：
 
-- [身份管理 API](../docs/api-design.md#1-身份管理)
-- [凭证管理 API](../docs/api-design.md#2-凭证管理)
-- [验证请求 API](../docs/api-design.md#4-验证请求)
+### 1. 身份管理
+
+- `sdk.identity.create(params)` - 创建新的DID
+- `sdk.identity.get(did)` - 获取身份详情
+- `sdk.identity.resolve(did)` - 解析DID
+- `sdk.identity.list()` - 列出所有身份
+- `sdk.identity.update(did, data)` - 更新身份信息
+- `sdk.identity.delete(did)` - 删除身份
+
+### 2. 凭证管理
+
+- `sdk.credential.issue(params)` - 签发凭证
+- `sdk.credential.get(id)` - 获取凭证详情
+- `sdk.credential.list()` - 列出所有凭证
+- `sdk.credential.verify(params)` - 验证凭证
+- `sdk.credential.revoke(id, reason)` - 撤销凭证
+- `sdk.credential.share(params)` - 分享凭证
+
+### 3. 验证服务
+
+- `sdk.verification.verifySharedLink(link)` - 验证分享链接
+- `sdk.verification.verifyQrCode(data)` - 验证二维码
+- `sdk.verification.getHistory()` - 获取验证历史
 
 ## 开发计划
 

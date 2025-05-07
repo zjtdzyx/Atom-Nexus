@@ -1,9 +1,15 @@
-# IDVault - 去中心化数字身份管理系统 🎯
+# Atom Nexus - 去中心化数字身份管理系统 🎯
 
 > 我的2025年毕业设计项目
 
+<div align="center">
+  <img src="./Atom Nexus Logo.png" alt="Atom Nexus Logo" width="200" />
+  <p><i>"Your Identity. Your Network. Decentralized."</i></p>
+  <p><b>「身份自持，网络自由。」</b></p>
+</div>
+
 ## 📝 项目简介
-IDVault 是一个面向个人和企业的去中心化数字身份管理系统，帮助用户在多平台中统一、安全地管理自己的数字身份凭证，避免隐私泄露与账号碎片化问题。系统致力于打造**简洁易用、标准合规、场景聚焦**的平台，实现凭证的**创建、签发、验证、管理**等全链路闭环，服务于高校学生和中小企业两大应用场景。
+Atom Nexus 是一个面向个人和企业的去中心化数字身份管理系统，帮助用户在多平台中统一、安全地管理自己的数字身份凭证，避免隐私泄露与账号碎片化问题。系统致力于打造**简洁易用、标准合规、场景聚焦**的平台，实现凭证的**创建、签发、验证、管理**等全链路闭环，服务于高校学生和中小企业两大应用场景。
 
 ## 🚀 在线预览
 ⚠️ *开发中...*  
@@ -38,7 +44,7 @@ IDVault 是一个面向个人和企业的去中心化数字身份管理系统，
 
 ```bash
 # 克隆仓库
-git clone https://github.com/zjtdzyx/idvault-graduation-project.git
+git clone https://github.com/zjtdzyx/atom-nexus-graduation-project.git
 
 # 进入前端或后端目录分别安装依赖
 cd frontend && pnpm install
@@ -79,12 +85,11 @@ cd backend && pnpm install
 
 - [立项书](docs/proposal.md)
 - [市场调研](docs/market-research.md)
-- [API设计](docs/api-design.md)
 - [系统设计](docs/system-design.md)
 
 ## ✨ 开发计划
 
-请查看 [GitHub Project看板](https://github.com/zjtdzyx/idvault-graduation-project/projects/1)
+请查看 [GitHub Project看板](https://github.com/zjtdzyx/atom-nexus-graduation-project/projects/1)
 
 ## 🤝 许可协议
 

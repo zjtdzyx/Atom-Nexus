@@ -5,9 +5,9 @@ import { SDKConfig } from '../types';
 import { ApiClient } from '../utils/ApiClient';
 
 /**
- * IDVault SDK 主类，提供去中心化身份与凭证管理功能
+ * Atom Nexus SDK 主类，提供去中心化身份与凭证管理功能
  */
-export class IDVaultSDK {
+export class AtomNexusSDK {
   private config: SDKConfig;
   private apiClient: ApiClient;
 
@@ -16,7 +16,7 @@ export class IDVaultSDK {
   public verification: VerificationService;
 
   /**
-   * 创建 IDVault SDK 实例
+   * 创建 Atom Nexus SDK 实例
    * @param config SDK 配置
    */
   constructor(config: SDKConfig) {
@@ -37,8 +37,8 @@ export class IDVaultSDK {
       apiKey: config.apiKey,
       environment: config.environment || 'development',
       apiUrl: config.apiUrl || (config.environment === 'production' 
-        ? 'https://api.idvault.xyz/v1' 
-        : 'https://dev-api.idvault.xyz/v1'),
+        ? 'https://api.atom-nexus.xyz/v1' 
+        : 'https://dev-api.atom-nexus.xyz/v1'),
       options: {
         timeout: config.options?.timeout || 10000,
         autoRefreshToken: config.options?.autoRefreshToken !== false,

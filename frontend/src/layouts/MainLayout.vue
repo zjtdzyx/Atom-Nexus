@@ -3,7 +3,10 @@
     <!-- 侧边栏 -->
     <div class="w-64 bg-gray-900 text-white">
       <div class="p-4">
-        <div class="text-2xl font-bold mb-6">IDVault</div>
+        <div class="flex items-center justify-center mb-6">
+          <img src="../../public/atom-nexus-logo.png" alt="Atom Nexus" class="w-10 h-10 mr-2" />
+          <div class="text-2xl font-bold">Atom Nexus</div>
+        </div>
 
         <nav class="space-y-2">
           <RouterLink to="/" class="nav-link" :class="{ active: currentRoute === '/' }">

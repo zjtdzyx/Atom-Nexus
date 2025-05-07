@@ -1,5 +1,5 @@
 {
-  "name": "@idvault/sdk",
+  "name": "@atom-nexus/sdk",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
