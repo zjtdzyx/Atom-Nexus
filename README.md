@@ -3,7 +3,7 @@
 > 我的2025年毕业设计项目
 
 <div align="center">
-  <img src="./Atom Nexus Logo.png" alt="Atom Nexus Logo" width="200" />
+  <img src="./frontend/public/atom-nexus-logo.png" alt="Atom Nexus Logo" width="200" />
   <p><i>"Your Identity. Your Network. Decentralized."</i></p>
   <p><b>「身份自持，网络自由。」</b></p>
 </div>
