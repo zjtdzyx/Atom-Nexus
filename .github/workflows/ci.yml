@@ -1,0 +1,79 @@
+name: IDVault CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: |
+          cd frontend && pnpm install
+      - name: Run linting
+        run: |
+          cd frontend && pnpm lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: |
+          cd frontend && pnpm install
+          cd ../backend && pnpm install
+      - name: Run frontend tests
+        run: |
+          cd frontend && pnpm test
+      - name: Run backend tests
+        run: |
+          cd backend && pnpm test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: |
+          cd frontend && pnpm install
+          cd ../backend && pnpm install
+      - name: Build frontend
+        run: |
+          cd frontend && pnpm build
+      - name: Build backend
+        run: |
+          cd backend && pnpm build

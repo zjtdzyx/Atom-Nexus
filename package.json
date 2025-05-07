@@ -1,0 +1,37 @@
+{
+  "name": "idvault-graduation-project",
+  "version": "0.1.0",
+  "private": true,
+  "description": "去中心化数字身份管理系统 - 毕业设计项目",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "cd frontend && pnpm dev",
+    "dev:backend": "cd backend && pnpm start:dev",
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\"",
+    "build:frontend": "cd frontend && pnpm build",
+    "build:backend": "cd backend && pnpm build",
+    "build": "pnpm build:frontend && pnpm build:backend",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
+  },
+  "keywords": [
+    "DID",
+    "decentralized-identity",
+    "blockchain",
+    "verifiable-credentials",
+    "graduation-project"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16",
+    "pnpm": ">=7"
+  },
+  "packageManager": "pnpm@8.6.0",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+} 
