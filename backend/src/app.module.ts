@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { DidModule } from './modules/did/did.module';
+import { CredentialModule } from './modules/credential/credential.module';
 
 @Module({
-  imports: [DidModule],
+  imports: [DidModule, CredentialModule],
   controllers: [],
   providers: [],
 })
