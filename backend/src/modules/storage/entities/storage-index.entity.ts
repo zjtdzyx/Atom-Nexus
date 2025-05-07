@@ -21,21 +21,15 @@ export class StorageIndex {
   @JoinColumn({ name: 'file_id' })
   file: StorageFile;
 
-  @Column({ name: 'indexer_did' })
+  @Column({ name: 'indexer_did', nullable: true })
   indexerDid: string;
 
-  @ManyToOne(() => Did)
+  @ManyToOne(() => Did, { nullable: true })
   @JoinColumn({ name: 'indexer_did' })
   indexer: Did;
 
-  @Column()
-  indexType: string;
-
-  @Column({ type: 'text' })
-  indexData: string;
-
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({ type: 'jsonb' })
+  metadata: Record<string, any>;
 
   @CreateDateColumn()
   createdAt: Date;
