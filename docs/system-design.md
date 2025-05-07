@@ -726,3 +726,146 @@
   - 输入：证明请求数据
   - 输出：验证结果
 
+
+
+## 七、数据库设计
+
+### **1. 用户身份模块 (DidModule)**
+
+**表名：dids**
+
+| 字段           | 类型      | 说明             |
+| -------------- | --------- | ---------------- |
+| id             | UUID (PK) | DID 唯一标识     |
+| wallet_address | VARCHAR   | 钱包地址（可选） |
+| email          | VARCHAR   | 邮箱（可选）     |
+| social_account | VARCHAR   | 社交账号（可选） |
+| public_key     | TEXT      | 公钥             |
+| created_at     | TIMESTAMP | 创建时间         |
+
+
+
+### **2. 凭证管理模块 (CredentialModule)**
+
+**表名：credentials**
+
+| 字段            | 类型      | 说明             |
+| --------------- | --------- | ---------------- |
+| id              | UUID (PK) | 凭证ID           |
+| owner_did       | UUID (FK) | DID 用户ID       |
+| credential_type | VARCHAR   | 凭证类型         |
+| credential_data | JSONB     | 凭证具体内容     |
+| status          | ENUM      | active/revoked   |
+| issued_at       | TIMESTAMP | 签发时间         |
+| revoked_at      | TIMESTAMP | 撤销时间（可选） |
+
+
+
+### **3. 身份验证模块 (AuthModule)**
+
+身份验证**无需单独建表**（它是基于 DID 和凭证表来验证的），但如果要记录验证日志：
+
+**表名：auth_logs**
+
+| 字段          | 类型      | 说明       |
+| ------------- | --------- | ---------- |
+| id            | UUID (PK) | 主键       |
+| did_id        | UUID (FK) | 验证的 DID |
+| credential_id | UUID (FK) | 验证的凭证 |
+| action        | VARCHAR   | 验证类型   |
+| success       | BOOLEAN   | 是否成功   |
+| timestamp     | TIMESTAMP | 验证时间   |
+
+
+
+### **4. 权限控制模块 (PermissionModule)**
+
+**表名：permissions**
+
+| 字段            | 类型      | 说明                  |
+| --------------- | --------- | --------------------- |
+| id              | UUID (PK) | 主键                  |
+| did_id          | UUID (FK) | 授权者DID             |
+| credential_id   | UUID (FK) | 授权凭证ID            |
+| permission_type | ENUM      | once/longterm/partial |
+| created_at      | TIMESTAMP | 设置时间              |
+
+**表名：permission_audit_logs**
+
+| 字段      | 类型      | 说明      |
+| --------- | --------- | --------- |
+| id        | UUID (PK) | 主键      |
+| did_id    | UUID (FK) | 操作者DID |
+| action    | VARCHAR   | 动作类型  |
+| timestamp | TIMESTAMP | 审计时间  |
+
+
+
+### **5. 开发者接口模块 (DeveloperModule)**
+
+**表名：developers**
+
+| 字段       | 类型      | 说明                   |
+| ---------- | --------- | ---------------------- |
+| id         | UUID (PK) | 开发者ID               |
+| name       | VARCHAR   | 名称                   |
+| api_key    | VARCHAR   | 分发给开发者的 API Key |
+| created_at | TIMESTAMP | 注册时间               |
+
+
+
+### **6. 系统管理后台 (AdminModule)**
+
+后台本质上**复用其他表**（用户、凭证、权限）
+ 如果要单独记录管理员操作日志：
+
+**表名：admin_logs**
+
+| 字段      | 类型      | 说明       |
+| --------- | --------- | ---------- |
+| id        | UUID (PK) | 主键       |
+| admin_id  | UUID      | 管理员ID   |
+| action    | VARCHAR   | 操作类型   |
+| target_id | UUID      | 目标对象ID |
+| timestamp | TIMESTAMP | 操作时间   |
+
+
+
+### **7. 数据存储模块 (StorageModule)**
+
+**表名：storage_files**
+
+| 字段         | 类型      | 说明             |
+| ------------ | --------- | ---------------- |
+| id           | UUID (PK) | 主键             |
+| uploader_did | UUID (FK) | 上传者DID        |
+| cid          | VARCHAR   | IPFS/Ceramic CID |
+| file_name    | VARCHAR   | 文件名           |
+| file_type    | VARCHAR   | 文件类型         |
+| created_at   | TIMESTAMP | 上传时间         |
+
+**表名：storage_indexes**
+
+| 字段       | 类型      | 说明           |
+| ---------- | --------- | -------------- |
+| id         | UUID (PK) | 主键           |
+| file_id    | UUID (FK) | 关联文件ID     |
+| metadata   | JSONB     | 链下索引元数据 |
+| created_at | TIMESTAMP | 索引时间       |
+
+
+
+### **8. 安全与加密模块 (SecurityModule)**
+
+如果你需要记录加密/解密请求日志：
+
+**表名：security_logs**
+
+| 字段      | 类型      | 说明                  |
+| --------- | --------- | --------------------- |
+| id        | UUID (PK) | 主键                  |
+| did_id    | UUID (FK) | 请求者DID             |
+| action    | ENUM      | encrypt/decrypt/proof |
+| success   | BOOLEAN   | 是否成功              |
+| timestamp | TIMESTAMP | 时间                  |
+
