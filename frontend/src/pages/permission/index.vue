@@ -9,7 +9,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- 设置权限卡片 -->
       <div class="feature-card hover:transform hover:-translate-y-2 transition-all duration-300"
-        @click="router.push('/permission/set')">
+        @click="navigateTo('/permission/set')">
         <div class="rounded-full w-12 h-12 flex items-center justify-center bg-neon/20 mb-4">
           <div class="i-carbon-security text-neon text-2xl"></div>
         </div>
@@ -22,7 +22,7 @@
 
       <!-- 审计日志卡片 -->
       <div class="feature-card hover:transform hover:-translate-y-2 transition-all duration-300"
-        @click="router.push('/permission/audit')">
+        @click="navigateTo('/permission/audit')">
         <div class="rounded-full w-12 h-12 flex items-center justify-center bg-neon/20 mb-4">
           <div class="i-carbon-activity text-neon text-2xl"></div>
         </div>
@@ -86,7 +86,7 @@
                 <p class="text-sm text-textgray">{{ formatTimestamp(log.timestamp) }}</p>
               </div>
             </div>
-            <button class="text-neon text-sm hover:underline" @click="router.push(`/permission/${log.targetDid}`)">
+            <button class="text-neon text-sm hover:underline" @click="viewLogDetails(log.id, log.targetDid)">
               查看详情
             </button>
           </div>
@@ -114,7 +114,8 @@
   import { ref, computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { usePermissionStore } from '@/stores/permission';
-  import type { AuditLog } from '@/stores/permission';
+  import type { AuditLog } from '@/types/permission';
+  import { logger } from '@/utils/logger';
 
   const router = useRouter();
   const permissionStore = usePermissionStore();
@@ -129,22 +130,37 @@
   const recentLogs = ref<AuditLog[]>([]);
   const loading = ref(false);
 
+  // 导航到指定页面
+  const navigateTo = (path: string) => {
+    logger.info('Component:PermissionPage', `导航到${path}页面`);
+    router.push(path);
+  };
+
   // 搜索DID权限
   const searchDidPermissions = () => {
     if (!isValidDid.value) return;
 
+    logger.info('Component:PermissionPage', '搜索DID权限', { did: searchDid.value });
     router.push(`/permission/${searchDid.value}`);
+  };
+
+  // 查看日志详情
+  const viewLogDetails = (logId: string, targetDid: string) => {
+    logger.info('Component:PermissionPage', '查看日志详情', { logId, targetDid });
+    router.push(`/permission/${targetDid}?log=${logId}`);
   };
 
   // 获取最近日志
   const fetchRecentLogs = async () => {
     loading.value = true;
+    logger.info('API:Permission', '开始获取最近权限日志');
 
     try {
       await permissionStore.fetchAuditLogs(1, 5);
       recentLogs.value = permissionStore.getAuditLogs;
-    } catch (error) {
-      console.error('获取最近日志失败', error);
+      logger.info('API:Permission', '获取最近权限日志成功', { count: recentLogs.value.length });
+    } catch (error: any) {
+      logger.error('API:Permission', '获取最近权限日志失败', { error: error.message });
     } finally {
       loading.value = false;
     }
@@ -152,6 +168,7 @@
 
   // 刷新最近日志
   const refreshRecentLogs = () => {
+    logger.info('Component:PermissionPage', '手动刷新权限日志');
     fetchRecentLogs();
   };
 
@@ -190,6 +207,7 @@
   };
 
   onMounted(() => {
+    logger.info('Page:Permission', '页面已加载');
     fetchRecentLogs();
   });
 </script>

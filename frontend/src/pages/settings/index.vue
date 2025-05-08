@@ -35,12 +35,14 @@
           <div class="space-y-6">
             <div>
               <label class="block text-textgray mb-2">用户名</label>
-              <input type="text" v-model="userPreferences.username" class="input w-full bg-darkbg text-textlight border-metal/20" />
+              <input type="text" v-model="userPreferences.username"
+                class="input w-full bg-darkbg text-textlight border-metal/20" />
             </div>
 
             <div>
               <label class="block text-textgray mb-2">电子邮箱</label>
-              <input type="email" v-model="userPreferences.email" class="input w-full bg-darkbg text-textlight border-metal/20" />
+              <input type="email" v-model="userPreferences.email"
+                class="input w-full bg-darkbg text-textlight border-metal/20" />
             </div>
 
             <div>
@@ -75,71 +77,89 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { fetchUserPreferences, updateUserPreferences, resetUserPreferences } from '../../services/settings';
-import { useToast } from '../../hooks/useToast';
-import ThemeSelector from '../../components/settings/ThemeSelector.vue';
-import NotificationSettings from '../../components/settings/NotificationSettings.vue';
+  import { ref, onMounted } from 'vue';
+  import { fetchUserPreferences, updateUserPreferences, resetUserPreferences } from '@/services/settings';
+  import { useToast } from '@/hooks/useToast';
+  import ThemeSelector from '@/components/settings/ThemeSelector.vue';
+  import NotificationSettings from '@/components/settings/NotificationSettings.vue';
+  import { logger } from '@/utils/logger';
 
-const { showToast } = useToast();
+  const { showToast } = useToast();
 
-const userPreferences = ref({
-  username: 'AtomUser',
-  email: 'user@example.com',
-  language: 'zh-CN',
-  theme: 'dark',
-  notifications: {
-    email: true,
-    sms: false,
-    push: true,
-    loginAlert: true,
-    securityAlert: true
-  }
-});
+  const userPreferences = ref({
+    username: 'AtomUser',
+    email: 'user@example.com',
+    language: 'zh-CN',
+    theme: 'dark',
+    notifications: {
+      email: true,
+      sms: false,
+      push: true,
+      loginAlert: true,
+      securityAlert: true
+    }
+  });
 
-onMounted(async () => {
-  try {
-    const { data } = await fetchUserPreferences();
-    userPreferences.value = {
-      ...userPreferences.value,
-      language: data.language,
-      theme: data.theme,
-      notifications: data.notifications
-    };
-  } catch (error) {
-    showToast('获取用户偏好设置失败', 'error');
-  }
-});
+  onMounted(async () => {
+    logger.info('Page:Settings', '页面已加载');
 
-const savePreferences = async () => {
-  try {
-    await updateUserPreferences({
-      language: userPreferences.value.language,
-      theme: userPreferences.value.theme,
-      notifications: userPreferences.value.notifications
-    });
-    showToast('设置保存成功', 'success');
-  } catch (error) {
-    showToast('设置保存失败', 'error');
-  }
-};
+    try {
+      logger.info('Component:SettingsPage', '开始获取用户偏好设置');
+      const { data } = await fetchUserPreferences();
+      userPreferences.value = {
+        ...userPreferences.value,
+        language: data.language,
+        theme: data.theme,
+        notifications: data.notifications
+      };
+      logger.info('Component:SettingsPage', '获取用户偏好设置成功');
+    } catch (error: any) {
+      logger.error('Component:SettingsPage', '获取用户偏好设置失败', { error: error.message });
+      showToast('获取用户偏好设置失败', 'error');
+    }
+  });
 
-const resetPreferences = async () => {
-  try {
-    const { data } = await resetUserPreferences();
-    userPreferences.value = {
-      ...userPreferences.value,
-      language: data.language,
-      theme: data.theme,
-      notifications: data.notifications
-    };
-    showToast('设置已重置为默认值', 'success');
-  } catch (error) {
-    showToast('设置重置失败', 'error');
-  }
-};
+  const savePreferences = async () => {
+    logger.info('Component:SettingsPage', '点击保存偏好设置按钮');
+
+    try {
+      logger.info('Component:SettingsPage', '开始保存用户偏好设置');
+      await updateUserPreferences({
+        language: userPreferences.value.language,
+        theme: userPreferences.value.theme,
+        notifications: userPreferences.value.notifications
+      });
+      logger.info('Component:SettingsPage', '保存用户偏好设置成功');
+      showToast('设置保存成功', 'success');
+    } catch (error: any) {
+      logger.error('Component:SettingsPage', '保存用户偏好设置失败', { error: error.message });
+      showToast('设置保存失败', 'error');
+    }
+  };
+
+  const resetPreferences = async () => {
+    logger.info('Component:SettingsPage', '点击重置偏好设置按钮');
+
+    try {
+      logger.info('Component:SettingsPage', '开始重置用户偏好设置');
+      const { data } = await resetUserPreferences();
+      userPreferences.value = {
+        ...userPreferences.value,
+        language: data.language,
+        theme: data.theme,
+        notifications: data.notifications
+      };
+      logger.info('Component:SettingsPage', '重置用户偏好设置成功');
+      showToast('设置已重置为默认值', 'success');
+    } catch (error: any) {
+      logger.error('Component:SettingsPage', '重置用户偏好设置失败', { error: error.message });
+      showToast('设置重置失败', 'error');
+    }
+  };
 </script>
 
 <style scoped>
-/* 所有样式已移至相应组件中 */
+  .card {
+    @apply bg-primary/40 rounded-lg;
+  }
 </style>

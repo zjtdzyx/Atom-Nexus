@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { identityService } from '@/services/identity';
 import type { Identity, LoginHistory, IdentityProfile } from '@/types/identity';
+import { logger } from '@/utils/logger';
 
 interface IdentityState {
   identities: Identity[];
@@ -36,11 +37,14 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Identity', '开始获取身份列表');
+
       try {
         this.identities = await identityService.getIdentities();
+        logger.info('Store:Identity', '获取身份列表成功', { count: this.identities.length });
       } catch (error: any) {
         this.error = error.message || '获取身份列表失败';
-        console.error('获取身份列表失败:', error);
+        logger.error('Store:Identity', '获取身份列表失败', { error: error.message });
       } finally {
         this.loading = false;
       }
@@ -50,11 +54,14 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Identity', '开始获取身份详情', { id });
+
       try {
         this.currentIdentity = await identityService.getIdentityById(id);
+        logger.info('Store:Identity', '获取身份详情成功');
       } catch (error: any) {
         this.error = error.message || '获取身份详情失败';
-        console.error('获取身份详情失败:', error);
+        logger.error('Store:Identity', '获取身份详情失败', { id, error: error.message });
       } finally {
         this.loading = false;
       }
@@ -64,13 +71,16 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Identity', '开始创建身份');
+
       try {
         const newIdentity = await identityService.createIdentity(identity);
         this.identities.push(newIdentity);
+        logger.info('Store:Identity', '创建身份成功', { id: newIdentity.id });
         return newIdentity;
       } catch (error: any) {
         this.error = error.message || '创建身份失败';
-        console.error('创建身份失败:', error);
+        logger.error('Store:Identity', '创建身份失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -81,6 +91,8 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Identity', '开始绑定身份', { did });
+
       try {
         const newIdentity = await identityService.createIdentity({
           did,
@@ -88,10 +100,11 @@ export const useIdentityStore = defineStore('identity', {
           status: 'active',
         });
         this.identities.push(newIdentity);
+        logger.info('Store:Identity', '绑定身份成功', { id: newIdentity.id });
         return newIdentity;
       } catch (error: any) {
         this.error = error.message || '绑定身份失败';
-        console.error('绑定身份失败:', error);
+        logger.error('Store:Identity', '绑定身份失败', { did, error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -101,6 +114,8 @@ export const useIdentityStore = defineStore('identity', {
     async updateIdentity(id: string, identity: Partial<Identity>) {
       this.loading = true;
       this.error = null;
+
+      logger.info('Store:Identity', '开始更新身份', { id });
 
       try {
         const updatedIdentity = await identityService.updateIdentity(id, identity);
@@ -115,10 +130,11 @@ export const useIdentityStore = defineStore('identity', {
           this.currentIdentity = updatedIdentity;
         }
 
+        logger.info('Store:Identity', '更新身份成功');
         return updatedIdentity;
       } catch (error: any) {
         this.error = error.message || '更新身份失败';
-        console.error('更新身份失败:', error);
+        logger.error('Store:Identity', '更新身份失败', { id, error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -129,6 +145,8 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Identity', '开始删除身份', { id });
+
       try {
         await identityService.deleteIdentity(id);
 
@@ -138,9 +156,11 @@ export const useIdentityStore = defineStore('identity', {
         if (this.currentIdentity?.id === id) {
           this.currentIdentity = null;
         }
+
+        logger.info('Store:Identity', '删除身份成功');
       } catch (error: any) {
         this.error = error.message || '删除身份失败';
-        console.error('删除身份失败:', error);
+        logger.error('Store:Identity', '删除身份失败', { id, error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -151,16 +171,22 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      const id = identityId || this.currentIdentity?.id;
+      logger.info('Store:Identity', '开始获取登录历史', { identityId: id });
+
       try {
-        const id = identityId || this.currentIdentity?.id;
         if (!id) {
           throw new Error('未指定身份ID');
         }
 
         this.loginHistory = await identityService.getLoginHistory(id);
+        logger.info('Store:Identity', '获取登录历史成功', { count: this.loginHistory.length });
       } catch (error: any) {
         this.error = error.message || '获取登录历史失败';
-        console.error('获取登录历史失败:', error);
+        logger.error('Store:Identity', '获取登录历史失败', {
+          identityId: id,
+          error: error.message,
+        });
       } finally {
         this.loading = false;
       }
@@ -170,16 +196,22 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      const id = identityId || this.currentIdentity?.id;
+      logger.info('Store:Identity', '开始获取身份资料', { identityId: id });
+
       try {
-        const id = identityId || this.currentIdentity?.id;
         if (!id) {
           throw new Error('未指定身份ID');
         }
 
         this.profile = await identityService.getProfile(id);
+        logger.info('Store:Identity', '获取身份资料成功');
       } catch (error: any) {
         this.error = error.message || '获取身份资料失败';
-        console.error('获取身份资料失败:', error);
+        logger.error('Store:Identity', '获取身份资料失败', {
+          identityId: id,
+          error: error.message,
+        });
       } finally {
         this.loading = false;
       }
@@ -189,17 +221,23 @@ export const useIdentityStore = defineStore('identity', {
       this.loading = true;
       this.error = null;
 
+      const id = identityId || this.currentIdentity?.id;
+      logger.info('Store:Identity', '开始更新身份资料', { identityId: id });
+
       try {
-        const id = identityId || this.currentIdentity?.id;
         if (!id) {
           throw new Error('未指定身份ID');
         }
 
         this.profile = await identityService.updateProfile(id, profileData);
+        logger.info('Store:Identity', '更新身份资料成功');
         return this.profile;
       } catch (error: any) {
         this.error = error.message || '更新身份资料失败';
-        console.error('更新身份资料失败:', error);
+        logger.error('Store:Identity', '更新身份资料失败', {
+          identityId: id,
+          error: error.message,
+        });
         throw error;
       } finally {
         this.loading = false;
@@ -208,6 +246,7 @@ export const useIdentityStore = defineStore('identity', {
 
     // 清空状态
     resetState() {
+      logger.info('Store:Identity', '重置身份状态');
       this.identities = [];
       this.currentIdentity = null;
       this.loginHistory = [];
