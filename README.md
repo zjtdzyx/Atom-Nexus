@@ -1,6 +1,6 @@
 # Atom Nexus - 去中心化数字身份管理系统 🎯
 
-> 我的2025年毕业设计项目
+> 我的2026年毕业设计项目
 
 <div align="center">
   <img src="./frontend/public/atom-nexus-logo.png" alt="Atom Nexus Logo" width="200" />
@@ -104,6 +104,16 @@ cd backend && pnpm start:dev
 - 系统架构设计
 - 项目初始化与仓库设置
 - 系统功能模块与API接口设计
+- 后端八大模块API实现与数据库层实现
+- 前端八大模块基本界面实现与API对接
+
+## × 未完成
+
+ - swagger后端API测试
+ - 前端八大模块界面交互测试
+ - 前端八大模块与后端API联调测试
+ - 区块链实现
+ - 数据库E-R图、系统模块图、系统数据流图绘制
 
 ## 📅 开发路线图
 

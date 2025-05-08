@@ -1,4 +1,4 @@
-name: IDVault CI
+name: Atom Nexus CI
 
 on:
   push:
