@@ -15,7 +15,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div class="col-span-1 md:col-span-1">
             <div class="flex items-center mb-4">
-              <img src="../../public/atom-nexus-logo.png" alt="Atom Nexus" class="h-8 w-auto" />
+              <img src="/atom-nexus-logo.png" alt="Atom Nexus" class="h-8 w-auto" />
               <span class="ml-2 text-xl font-bold text-textlight">Atom Nexus</span>
             </div>
             <p class="text-textgray text-sm mb-4">
@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
   import { ref, onMounted, onUnmounted } from 'vue';
-  import Navbar from '@/components/layout/Navbar.vue';
+  import Navbar from '../components/layout/Navbar.vue';
 
   // 监听滚动以改变导航栏样式
   const isScrolled = ref(false);

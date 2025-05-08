@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import { credentialService } from '@/services/credential';
+import type { Credential, VerificationResult, CredentialTemplate } from '@/types/credential';
 
 // 凭证状态枚举
 export enum CredentialStatus {
@@ -47,15 +48,6 @@ export interface CredentialDetail extends Credential {
   metadata?: Record<string, any>;
 }
 
-// 验证结果接口
-export interface VerificationResult {
-  isValid: boolean;
-  status: string;
-  message: string;
-  verifiedAt: string;
-  verifierDid?: string;
-}
-
 // 授权设置接口
 export interface PermissionSetting {
   credentialId: string;
@@ -65,137 +57,163 @@ export interface PermissionSetting {
   expirationDate?: string;
 }
 
-// Store状态接口
 interface CredentialState {
   credentials: Credential[];
-  currentCredential: CredentialDetail | null;
+  currentCredential: Credential | null;
+  templates: CredentialTemplate[];
   verificationResult: VerificationResult | null;
   loading: boolean;
   error: string | null;
-  qrCodeUrl: string | null;
 }
 
 export const useCredentialStore = defineStore('credential', {
   state: (): CredentialState => ({
     credentials: [],
     currentCredential: null,
+    templates: [],
     verificationResult: null,
     loading: false,
     error: null,
-    qrCodeUrl: null,
   }),
 
   getters: {
-    getCredentials: (state) => state.credentials,
-    getCurrentCredential: (state) => state.currentCredential,
-    getVerificationResult: (state) => state.verificationResult,
-    isLoading: (state) => state.loading,
-    hasError: (state) => !!state.error,
-    getError: (state) => state.error,
-    getQRCodeUrl: (state) => state.qrCodeUrl,
+    getCredentialById: (state) => (id: string) => {
+      return state.credentials.find((credential) => credential.id === id) || null;
+    },
   },
 
   actions: {
-    // 获取凭证列表
-    async fetchCredentials() {
+    async fetchCredentials(page = 1, limit = 10) {
       this.loading = true;
       this.error = null;
 
       try {
-        const response = await axios.get('/credential/list');
-        this.credentials = response.data.data || [];
-      } catch (error) {
+        this.credentials = await credentialService.getCredentials(page, limit);
+      } catch (error: any) {
+        this.error = error.message || '获取凭证列表失败';
         console.error('获取凭证列表失败:', error);
-        this.error = error instanceof Error ? error.message : '获取凭证列表失败';
       } finally {
         this.loading = false;
       }
     },
 
-    // 获取凭证详情
-    async fetchCredentialDetail(id: string) {
+    async fetchCredentialById(id: string) {
       this.loading = true;
       this.error = null;
-      this.currentCredential = null;
 
       try {
-        const response = await axios.get(`/credential/${id}`);
-        this.currentCredential = response.data.data;
-
-        // 获取凭证二维码
-        await this.fetchQRCode(id);
-      } catch (error) {
+        this.currentCredential = await credentialService.getCredentialById(id);
+      } catch (error: any) {
+        this.error = error.message || '获取凭证详情失败';
         console.error('获取凭证详情失败:', error);
-        this.error = error instanceof Error ? error.message : '获取凭证详情失败';
       } finally {
         this.loading = false;
       }
     },
 
-    // 获取凭证二维码
-    async fetchQRCode(id: string) {
+    async issueCredential(credentialData: Partial<Credential>) {
+      this.loading = true;
+      this.error = null;
+
       try {
-        const response = await axios.get(`/credential/qrcode?id=${id}`);
-        this.qrCodeUrl = response.data.qrCodeUrl;
-      } catch (error) {
-        console.error('获取凭证二维码失败:', error);
-        this.qrCodeUrl = null;
+        const credential = await credentialService.issueCredential(credentialData);
+        this.credentials.push(credential);
+        return credential;
+      } catch (error: any) {
+        this.error = error.message || '颁发凭证失败';
+        console.error('颁发凭证失败:', error);
+        throw error;
+      } finally {
+        this.loading = false;
       }
     },
 
-    // 验证凭证
     async verifyCredential(id: string) {
       this.loading = true;
       this.error = null;
-      this.verificationResult = null;
 
       try {
-        const response = await axios.post('/auth/verify-credential', { credentialId: id });
-        this.verificationResult = response.data.data;
+        this.verificationResult = await credentialService.verifyCredential(id);
         return this.verificationResult;
-      } catch (error) {
+      } catch (error: any) {
+        this.error = error.message || '验证凭证失败';
         console.error('验证凭证失败:', error);
-        this.error = error instanceof Error ? error.message : '验证凭证失败';
-        return null;
+        throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    // 设置凭证授权
-    async setPermission(settings: PermissionSetting) {
+    async revokeCredential(id: string, reason?: string) {
       this.loading = true;
       this.error = null;
 
       try {
-        const response = await axios.post('/permissions/set', settings);
-        return {
-          success: true,
-          message: '授权设置成功',
-          data: response.data.data,
-        };
-      } catch (error) {
-        console.error('设置授权失败:', error);
-        this.error = error instanceof Error ? error.message : '设置授权失败';
-        return {
-          success: false,
-          message: this.error,
-        };
+        await credentialService.revokeCredential(id, reason);
+
+        // 更新状态
+        const index = this.credentials.findIndex((credential) => credential.id === id);
+        if (index !== -1) {
+          this.credentials[index] = {
+            ...this.credentials[index],
+            status: 'revoked',
+          };
+        }
+
+        if (this.currentCredential?.id === id) {
+          this.currentCredential = {
+            ...this.currentCredential,
+            status: 'revoked',
+          };
+        }
+      } catch (error: any) {
+        this.error = error.message || '撤销凭证失败';
+        console.error('撤销凭证失败:', error);
+        throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    // 清除错误信息
-    clearError() {
+    async fetchCredentialTemplates() {
+      this.loading = true;
       this.error = null;
+
+      try {
+        this.templates = await credentialService.getCredentialTemplates();
+      } catch (error: any) {
+        this.error = error.message || '获取凭证模板失败';
+        console.error('获取凭证模板失败:', error);
+      } finally {
+        this.loading = false;
+      }
     },
 
-    // 重置当前凭证
-    resetCurrentCredential() {
+    async createCredentialFromTemplate(templateId: string, data: any) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const credential = await credentialService.createCredentialFromTemplate(templateId, data);
+        this.credentials.push(credential);
+        return credential;
+      } catch (error: any) {
+        this.error = error.message || '基于模板创建凭证失败';
+        console.error('基于模板创建凭证失败:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 清空状态
+    resetState() {
+      this.credentials = [];
       this.currentCredential = null;
+      this.templates = [];
       this.verificationResult = null;
-      this.qrCodeUrl = null;
+      this.loading = false;
+      this.error = null;
     },
   },
 });

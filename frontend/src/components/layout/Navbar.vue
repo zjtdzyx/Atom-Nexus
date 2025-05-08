@@ -4,7 +4,7 @@
       <!-- Logo -->
       <div class="logo-container flex items-center">
         <router-link to="/" class="flex items-center">
-          <img src="../../../public/atom-nexus-logo.png" alt="Atom Nexus" class="h-8 w-auto" />
+          <img src="/atom-nexus-logo.png" alt="Atom Nexus" class="h-8 w-auto" />
           <span class="ml-2 text-xl font-bold text-textlight">Atom Nexus</span>
         </router-link>
       </div>

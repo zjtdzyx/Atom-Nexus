@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
+import { developerService } from '@/services/developer';
+import type { ApiDocument, SdkInfo, ExampleProject, ApiKey } from '@/types/developer';
 
 // API 接口定义
 export interface Api {
@@ -44,111 +45,165 @@ export interface RegistrationResponse {
   message?: string;
 }
 
-// Store状态接口
 interface DeveloperState {
-  apis: Api[];
-  sdks: Sdk[];
+  apiDocumentation: ApiDocument | null;
+  sdkList: SdkInfo[];
+  currentSdk: SdkInfo | null;
+  exampleProjects: ExampleProject[];
+  apiKeys: ApiKey[];
   loading: boolean;
   error: string | null;
-  registrationResult: RegistrationResponse | null;
 }
 
 export const useDeveloperStore = defineStore('developer', {
   state: (): DeveloperState => ({
-    apis: [],
-    sdks: [],
+    apiDocumentation: null,
+    sdkList: [],
+    currentSdk: null,
+    exampleProjects: [],
+    apiKeys: [],
     loading: false,
     error: null,
-    registrationResult: null,
   }),
 
   getters: {
-    getApis: (state) => state.apis,
-    getApisByCategory: (state) => {
-      const grouped: Record<string, Api[]> = {};
-      state.apis.forEach((api) => {
-        if (!grouped[api.category]) {
-          grouped[api.category] = [];
-        }
-        grouped[api.category].push(api);
-      });
-      return grouped;
+    getSdkById: (state) => (id: string) => {
+      return state.sdkList.find((sdk) => sdk.id === id) || null;
     },
-    getSdks: (state) => state.sdks,
-    isLoading: (state) => state.loading,
-    hasError: (state) => !!state.error,
-    getError: (state) => state.error,
-    getRegistrationResult: (state) => state.registrationResult,
+
+    getExampleProjectById: (state) => (id: string) => {
+      return state.exampleProjects.find((project) => project.id === id) || null;
+    },
   },
 
   actions: {
-    // 获取API列表
-    async fetchApis() {
+    async fetchApiDocumentation() {
       this.loading = true;
       this.error = null;
 
       try {
-        const response = await axios.get('/developer/apis');
-        this.apis = response.data.data || [];
-      } catch (error) {
-        console.error('获取API列表失败:', error);
-        this.error = error instanceof Error ? error.message : '获取API列表失败';
+        this.apiDocumentation = await developerService.getApiDocumentation();
+      } catch (error: any) {
+        this.error = error.message || '获取API文档失败';
+        console.error('获取API文档失败:', error);
       } finally {
         this.loading = false;
       }
     },
 
-    // 获取SDK信息
-    async fetchSdkLink() {
+    async fetchSdkList() {
       this.loading = true;
       this.error = null;
 
       try {
-        const response = await axios.get('/developer/sdk');
-        this.sdks = response.data.data || [];
-      } catch (error) {
-        console.error('获取SDK信息失败:', error);
-        this.error = error instanceof Error ? error.message : '获取SDK信息失败';
+        this.sdkList = await developerService.getSdkList();
+      } catch (error: any) {
+        this.error = error.message || '获取SDK列表失败';
+        console.error('获取SDK列表失败:', error);
       } finally {
         this.loading = false;
       }
     },
 
-    // 注册开发者
-    async registerDeveloper(registration: DeveloperRegistration) {
+    async fetchSdkById(id: string) {
       this.loading = true;
       this.error = null;
-      this.registrationResult = null;
 
       try {
-        const response = await axios.post('/developer/register', registration);
-        this.registrationResult = {
-          success: true,
-          apiKey: response.data.apiKey,
-          message: response.data.message || '注册成功',
-        };
-        return this.registrationResult;
-      } catch (error) {
-        console.error('开发者注册失败:', error);
-        this.error = error instanceof Error ? error.message : '开发者注册失败';
-        this.registrationResult = {
-          success: false,
-          message: this.error,
-        };
-        return this.registrationResult;
+        this.currentSdk = await developerService.getSdkById(id);
+      } catch (error: any) {
+        this.error = error.message || '获取SDK详情失败';
+        console.error('获取SDK详情失败:', error);
       } finally {
         this.loading = false;
       }
     },
 
-    // 清除错误信息
-    clearError() {
+    async getSdkDownloadUrl(id: string, version: string): Promise<string | null> {
+      this.loading = true;
       this.error = null;
+
+      try {
+        return await developerService.getSdkDownloadUrl(id, version);
+      } catch (error: any) {
+        this.error = error.message || '获取SDK下载链接失败';
+        console.error('获取SDK下载链接失败:', error);
+        return null;
+      } finally {
+        this.loading = false;
+      }
     },
 
-    // 清除注册结果
-    clearRegistrationResult() {
-      this.registrationResult = null;
+    async fetchExampleProjects() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        this.exampleProjects = await developerService.getExampleProjects();
+      } catch (error: any) {
+        this.error = error.message || '获取示例项目列表失败';
+        console.error('获取示例项目列表失败:', error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchApiKeys() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        this.apiKeys = await developerService.getApiKeys();
+      } catch (error: any) {
+        this.error = error.message || '获取API密钥列表失败';
+        console.error('获取API密钥列表失败:', error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async createApiKey(name: string, permissions: string[]) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const apiKey = await developerService.createApiKey(name, permissions);
+        this.apiKeys.push(apiKey);
+        return apiKey;
+      } catch (error: any) {
+        this.error = error.message || '创建API密钥失败';
+        console.error('创建API密钥失败:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteApiKey(id: string) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        await developerService.deleteApiKey(id);
+        this.apiKeys = this.apiKeys.filter((key) => key.id !== id);
+      } catch (error: any) {
+        this.error = error.message || '删除API密钥失败';
+        console.error('删除API密钥失败:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 清空状态
+    resetState() {
+      this.apiDocumentation = null;
+      this.sdkList = [];
+      this.currentSdk = null;
+      this.exampleProjects = [];
+      this.apiKeys = [];
+      this.loading = false;
+      this.error = null;
     },
   },
 });

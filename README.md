@@ -91,10 +91,10 @@ git clone https://github.com/zjtdzyx/atom-nexus.git
 pnpm install
 
 # 启动前端开发服务器
-cd frontend && pnpm dev
+pnpm dev:frontend
 
 # 启动后端服务
-cd backend && pnpm start:dev
+pnpm dev:backend
 ```
 
 ## ✅ 已完成
