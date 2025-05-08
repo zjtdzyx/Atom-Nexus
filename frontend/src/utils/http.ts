@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { logger } from '@/utils/logger';
 
 // 创建axios实例
 const http: AxiosInstance = axios.create({
@@ -13,6 +14,14 @@ const http: AxiosInstance = axios.create({
 // 请求拦截器
 http.interceptors.request.use(
   (config) => {
+    // 记录请求日志
+    logger.info('HTTP', `发起请求: ${config.method?.toUpperCase()} ${config.url}`, {
+      method: config.method,
+      url: config.url,
+      params: config.params,
+      data: config.data,
+    });
+
     // 从pinia获取token（在组件外获取）
     const authStore = useAuthStore();
     const token = authStore.accessToken;
@@ -25,6 +34,7 @@ http.interceptors.request.use(
     return config;
   },
   (error) => {
+    logger.error('HTTP', '请求配置错误', { error: error.message });
     return Promise.reject(error);
   }
 );
@@ -32,15 +42,33 @@ http.interceptors.request.use(
 // 响应拦截器
 http.interceptors.response.use(
   (response: AxiosResponse) => {
+    // 记录成功响应日志
+    logger.info(
+      'HTTP',
+      `请求成功: ${response.config.method?.toUpperCase()} ${response.config.url}`,
+      {
+        status: response.status,
+        url: response.config.url,
+      }
+    );
+
     // 直接返回数据
     return response;
   },
   async (error: AxiosError) => {
     if (!error.response) {
+      logger.error('HTTP', '网络错误', { error: error.message });
       return Promise.reject(new Error('网络错误，请检查您的网络连接'));
     }
 
     const { status, data } = error.response as AxiosResponse;
+
+    // 记录错误响应日志
+    logger.error('HTTP', `请求失败: ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
+      status,
+      url: error.config?.url,
+      data,
+    });
 
     // 根据状态码处理不同错误
     switch (status) {
@@ -52,15 +80,19 @@ http.interceptors.response.use(
         // 未授权或token过期
         const authStore = useAuthStore();
 
+        logger.warn('HTTP', 'Token失效，尝试刷新');
+
         // 尝试刷新token
         const refreshSuccess = await authStore.refreshAuthToken();
 
         // 如果刷新成功，重试原始请求
         if (refreshSuccess && error.config) {
+          logger.info('HTTP', 'Token刷新成功，重试请求');
           return http(error.config);
         }
 
         // 刷新失败，跳转登录页
+        logger.warn('HTTP', 'Token刷新失败，重定向到登录页面');
         authStore.logoutUser();
         window.location.href = '/auth/login';
         return Promise.reject(new Error('登录已过期，请重新登录'));

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { UserProfile, SecuritySettings } from '@/types/account';
+import { logger } from '@/utils/logger';
 
 const API_BASE_URL = '/api/account';
 
@@ -11,8 +12,15 @@ export const accountService = {
    * 获取当前用户资料
    */
   async getUserProfile(): Promise<UserProfile> {
-    const response = await axios.get(`${API_BASE_URL}/profile`);
-    return response.data;
+    logger.info('API:Account', '开始请求用户资料');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/profile`);
+      logger.info('API:Account', '请求用户资料成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '请求用户资料失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -20,8 +28,15 @@ export const accountService = {
    * @param profileData 用户资料数据
    */
   async updateUserProfile(profileData: Partial<UserProfile>): Promise<UserProfile> {
-    const response = await axios.put(`${API_BASE_URL}/profile`, profileData);
-    return response.data;
+    logger.info('API:Account', '开始更新用户资料');
+    try {
+      const response = await axios.put(`${API_BASE_URL}/profile`, profileData);
+      logger.info('API:Account', '更新用户资料成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '更新用户资料失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -29,20 +44,34 @@ export const accountService = {
    * @param formData 包含头像文件的表单数据
    */
   async updateAvatar(formData: FormData): Promise<{ avatarUrl: string }> {
-    const response = await axios.post(`${API_BASE_URL}/avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    logger.info('API:Account', '开始更新用户头像');
+    try {
+      const response = await axios.post(`${API_BASE_URL}/avatar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      logger.info('API:Account', '更新用户头像成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '更新用户头像失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
    * 获取安全设置
    */
   async getSecuritySettings(): Promise<SecuritySettings> {
-    const response = await axios.get(`${API_BASE_URL}/security`);
-    return response.data;
+    logger.info('API:Account', '开始请求安全设置');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/security`);
+      logger.info('API:Account', '请求安全设置成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '请求安全设置失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -50,8 +79,15 @@ export const accountService = {
    * @param securityData 安全设置数据
    */
   async updateSecuritySettings(securityData: Partial<SecuritySettings>): Promise<SecuritySettings> {
-    const response = await axios.put(`${API_BASE_URL}/security`, securityData);
-    return response.data;
+    logger.info('API:Account', '开始更新安全设置');
+    try {
+      const response = await axios.put(`${API_BASE_URL}/security`, securityData);
+      logger.info('API:Account', '更新安全设置成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '更新安全设置失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -60,18 +96,32 @@ export const accountService = {
    * @param newPassword 新密码
    */
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
-    await axios.post(`${API_BASE_URL}/change-password`, {
-      currentPassword,
-      newPassword,
-    });
+    logger.info('API:Account', '开始更改密码');
+    try {
+      await axios.post(`${API_BASE_URL}/change-password`, {
+        currentPassword,
+        newPassword,
+      });
+      logger.info('API:Account', '更改密码成功');
+    } catch (error: any) {
+      logger.error('API:Account', '更改密码失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
    * 启用两因素认证
    */
   async enableTwoFactor(): Promise<{ qrCode: string; backupCodes: string[] }> {
-    const response = await axios.post(`${API_BASE_URL}/security/two-factor/enable`);
-    return response.data;
+    logger.info('API:Account', '开始启用两因素认证');
+    try {
+      const response = await axios.post(`${API_BASE_URL}/security/two-factor/enable`);
+      logger.info('API:Account', '启用两因素认证成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '启用两因素认证失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -79,8 +129,15 @@ export const accountService = {
    * @param code 验证码
    */
   async verifyTwoFactor(code: string): Promise<{ success: boolean }> {
-    const response = await axios.post(`${API_BASE_URL}/security/two-factor/verify`, { code });
-    return response.data;
+    logger.info('API:Account', '开始验证两因素认证');
+    try {
+      const response = await axios.post(`${API_BASE_URL}/security/two-factor/verify`, { code });
+      logger.info('API:Account', '验证两因素认证成功', { success: response.data.success });
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '验证两因素认证失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -88,15 +145,29 @@ export const accountService = {
    * @param code 验证码
    */
   async disableTwoFactor(code: string): Promise<void> {
-    await axios.post(`${API_BASE_URL}/security/two-factor/disable`, { code });
+    logger.info('API:Account', '开始禁用两因素认证');
+    try {
+      await axios.post(`${API_BASE_URL}/security/two-factor/disable`, { code });
+      logger.info('API:Account', '禁用两因素认证成功');
+    } catch (error: any) {
+      logger.error('API:Account', '禁用两因素认证失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
    * 获取用户设置
    */
   async getUserSettings(): Promise<any> {
-    const response = await axios.get(`${API_BASE_URL}/settings`);
-    return response.data;
+    logger.info('API:Account', '开始请求用户设置');
+    try {
+      const response = await axios.get(`${API_BASE_URL}/settings`);
+      logger.info('API:Account', '请求用户设置成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '请求用户设置失败', { error: error.message });
+      throw error;
+    }
   },
 
   /**
@@ -104,7 +175,14 @@ export const accountService = {
    * @param settings 设置数据
    */
   async updateUserSettings(settings: any): Promise<any> {
-    const response = await axios.put(`${API_BASE_URL}/settings`, settings);
-    return response.data;
+    logger.info('API:Account', '开始更新用户设置');
+    try {
+      const response = await axios.put(`${API_BASE_URL}/settings`, settings);
+      logger.info('API:Account', '更新用户设置成功');
+      return response.data;
+    } catch (error: any) {
+      logger.error('API:Account', '更新用户设置失败', { error: error.message });
+      throw error;
+    }
   },
 };

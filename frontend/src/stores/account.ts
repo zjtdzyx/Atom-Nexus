@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { accountService } from '@/services/account';
 import type { UserProfile, SecuritySettings } from '@/types/account';
+import { logger } from '@/utils/logger';
 
 interface AccountState {
   userProfile: UserProfile | null;
@@ -29,11 +30,14 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始获取用户资料');
+
       try {
         this.userProfile = await accountService.getUserProfile();
+        logger.info('Store:Account', '获取用户资料成功');
       } catch (error: any) {
         this.error = error.message || '获取用户资料失败';
-        console.error('获取用户资料失败:', error);
+        logger.error('Store:Account', '获取用户资料失败', { error: error.message });
       } finally {
         this.loading = false;
       }
@@ -43,12 +47,15 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始更新用户资料');
+
       try {
         this.userProfile = await accountService.updateUserProfile(profileData);
+        logger.info('Store:Account', '更新用户资料成功');
         return this.userProfile;
       } catch (error: any) {
         this.error = error.message || '更新用户资料失败';
-        console.error('更新用户资料失败:', error);
+        logger.error('Store:Account', '更新用户资料失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -58,6 +65,8 @@ export const useAccountStore = defineStore('account', {
     async updateAvatar(formData: FormData) {
       this.loading = true;
       this.error = null;
+
+      logger.info('Store:Account', '开始更新用户头像');
 
       try {
         const { avatarUrl } = await accountService.updateAvatar(formData);
@@ -69,10 +78,11 @@ export const useAccountStore = defineStore('account', {
           };
         }
 
+        logger.info('Store:Account', '更新用户头像成功', { avatarUrl });
         return avatarUrl;
       } catch (error: any) {
         this.error = error.message || '更新头像失败';
-        console.error('更新头像失败:', error);
+        logger.error('Store:Account', '更新用户头像失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -83,11 +93,14 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始获取安全设置');
+
       try {
         this.securitySettings = await accountService.getSecuritySettings();
+        logger.info('Store:Account', '获取安全设置成功');
       } catch (error: any) {
         this.error = error.message || '获取安全设置失败';
-        console.error('获取安全设置失败:', error);
+        logger.error('Store:Account', '获取安全设置失败', { error: error.message });
       } finally {
         this.loading = false;
       }
@@ -97,12 +110,15 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始更新安全设置');
+
       try {
         this.securitySettings = await accountService.updateSecuritySettings(securityData);
+        logger.info('Store:Account', '更新安全设置成功');
         return this.securitySettings;
       } catch (error: any) {
         this.error = error.message || '更新安全设置失败';
-        console.error('更新安全设置失败:', error);
+        logger.error('Store:Account', '更新安全设置失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -112,6 +128,8 @@ export const useAccountStore = defineStore('account', {
     async changePassword(currentPassword: string, newPassword: string) {
       this.loading = true;
       this.error = null;
+
+      logger.info('Store:Account', '开始修改密码');
 
       try {
         await accountService.changePassword(currentPassword, newPassword);
@@ -123,9 +141,11 @@ export const useAccountStore = defineStore('account', {
             lastPasswordChange: new Date().toISOString(),
           };
         }
+
+        logger.info('Store:Account', '修改密码成功');
       } catch (error: any) {
         this.error = error.message || '修改密码失败';
-        console.error('修改密码失败:', error);
+        logger.error('Store:Account', '修改密码失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -136,11 +156,15 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始启用两因素认证');
+
       try {
-        return await accountService.enableTwoFactor();
+        const result = await accountService.enableTwoFactor();
+        logger.info('Store:Account', '启用两因素认证成功');
+        return result;
       } catch (error: any) {
         this.error = error.message || '启用两因素认证失败';
-        console.error('启用两因素认证失败:', error);
+        logger.error('Store:Account', '启用两因素认证失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -151,6 +175,8 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始验证两因素认证', { code: code.substring(0, 2) + '***' });
+
       try {
         const result = await accountService.verifyTwoFactor(code);
 
@@ -159,12 +185,15 @@ export const useAccountStore = defineStore('account', {
             ...this.securitySettings,
             twoFactorEnabled: true,
           };
+          logger.info('Store:Account', '验证两因素认证成功');
+        } else {
+          logger.warn('Store:Account', '验证两因素认证不成功', { success: result.success });
         }
 
         return result;
       } catch (error: any) {
         this.error = error.message || '验证两因素认证失败';
-        console.error('验证两因素认证失败:', error);
+        logger.error('Store:Account', '验证两因素认证失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -175,6 +204,8 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始禁用两因素认证');
+
       try {
         await accountService.disableTwoFactor(code);
 
@@ -184,9 +215,11 @@ export const useAccountStore = defineStore('account', {
             twoFactorEnabled: false,
           };
         }
+
+        logger.info('Store:Account', '禁用两因素认证成功');
       } catch (error: any) {
         this.error = error.message || '禁用两因素认证失败';
-        console.error('禁用两因素认证失败:', error);
+        logger.error('Store:Account', '禁用两因素认证失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -197,11 +230,14 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始获取用户设置');
+
       try {
         this.settings = await accountService.getUserSettings();
+        logger.info('Store:Account', '获取用户设置成功');
       } catch (error: any) {
         this.error = error.message || '获取用户设置失败';
-        console.error('获取用户设置失败:', error);
+        logger.error('Store:Account', '获取用户设置失败', { error: error.message });
       } finally {
         this.loading = false;
       }
@@ -211,12 +247,15 @@ export const useAccountStore = defineStore('account', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Account', '开始更新用户设置');
+
       try {
         this.settings = await accountService.updateUserSettings(settings);
+        logger.info('Store:Account', '更新用户设置成功');
         return this.settings;
       } catch (error: any) {
         this.error = error.message || '更新用户设置失败';
-        console.error('更新用户设置失败:', error);
+        logger.error('Store:Account', '更新用户设置失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -225,6 +264,7 @@ export const useAccountStore = defineStore('account', {
 
     // 清空状态
     resetState() {
+      logger.info('Store:Account', '重置账户状态');
       this.userProfile = null;
       this.securitySettings = null;
       this.settings = null;

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
+import { logger } from '@/utils/logger';
 
 // -- AUTO-IMPORT ROUTES START --
 // 这里会自动导入路由组件
@@ -230,6 +231,41 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+// 全局前置守卫
+router.beforeEach((to, from, next) => {
+  // 记录路由跳转日志
+  logger.info('Router', `路由跳转: ${from.path} -> ${to.path}`, {
+    from: from.path,
+    to: to.path,
+    name: to.name,
+    params: to.params,
+    query: to.query,
+  });
+
+  // 设置页面标题
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - Atom Nexus`;
+  } else {
+    document.title = 'Atom Nexus';
+  }
+
+  // 继续导航
+  next();
+});
+
+// 全局后置钩子
+router.afterEach((to, _from) => {
+  // 记录路由加载完成日志
+  logger.info('Router', `路由加载完成: ${to.path}`, {
+    duration: performance.now(), // 粗略估计加载时间
+  });
+});
+
+// 路由错误处理
+router.onError((error) => {
+  logger.error('Router', '路由错误', { error: error.message });
 });
 
 export default router;
