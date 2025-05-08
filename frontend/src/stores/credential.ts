@@ -1,13 +1,8 @@
 import { defineStore } from 'pinia';
 import { credentialService } from '@/services/credential';
-import type { Credential, VerificationResult, CredentialTemplate } from '@/types/credential';
-
-// 凭证状态枚举
-export enum CredentialStatus {
-  ACTIVE = 'active',
-  REVOKED = 'revoked',
-  EXPIRED = 'expired',
-}
+import type { VerificationResult, CredentialTemplate, Credential } from '@/types/credential';
+import { CredentialStatus } from '@/types/credential';
+import { logger } from '@/utils/logger';
 
 // 凭证类型接口
 export interface CredentialType {
@@ -16,19 +11,14 @@ export interface CredentialType {
   description?: string;
 }
 
-// 单个凭证接口
-export interface Credential {
-  id: string;
-  name: string;
-  type: CredentialType;
-  issuerId: string;
-  issuerName?: string;
-  status: CredentialStatus;
-  issuedAt: string;
-  expirationDate?: string;
-  revocationDate?: string;
-  claims?: Record<string, any>;
-  transactionHash?: string;
+// 凭证证明接口
+export interface CredentialProof {
+  type: string;
+  created: string;
+  verificationMethod: string;
+  proofPurpose: string;
+  signatureValue: string;
+  signature?: string;
 }
 
 // 凭证详情接口
@@ -37,13 +27,6 @@ export interface CredentialDetail extends Credential {
     id: string;
     name?: string;
     [key: string]: any;
-  };
-  proof?: {
-    type: string;
-    created: string;
-    verificationMethod: string;
-    proofPurpose: string;
-    signatureValue: string;
   };
   metadata?: Record<string, any>;
 }
@@ -80,6 +63,24 @@ export const useCredentialStore = defineStore('credential', {
     getCredentialById: (state) => (id: string) => {
       return state.credentials.find((credential) => credential.id === id) || null;
     },
+
+    getActiveCredentials: (state) => {
+      return state.credentials.filter(
+        (credential) => credential.status === CredentialStatus.ACTIVE
+      );
+    },
+
+    getRevokedCredentials: (state) => {
+      return state.credentials.filter(
+        (credential) => credential.status === CredentialStatus.REVOKED
+      );
+    },
+
+    getExpiredCredentials: (state) => {
+      return state.credentials.filter(
+        (credential) => credential.status === CredentialStatus.EXPIRED
+      );
+    },
   },
 
   actions: {
@@ -87,11 +88,15 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始获取凭证列表', { page, limit });
+
       try {
-        this.credentials = await credentialService.getCredentials(page, limit);
+        const { data } = await credentialService.getCredentials(page, limit);
+        this.credentials = data;
+        logger.info('Store:Credential', '获取凭证列表成功', { count: data.length });
       } catch (error: any) {
         this.error = error.message || '获取凭证列表失败';
-        console.error('获取凭证列表失败:', error);
+        logger.error('Store:Credential', '获取凭证列表失败', { error: error.message });
       } finally {
         this.loading = false;
       }
@@ -101,11 +106,15 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始获取凭证详情', { id });
+
       try {
-        this.currentCredential = await credentialService.getCredentialById(id);
+        const { data } = await credentialService.getCredentialById(id);
+        this.currentCredential = data;
+        logger.info('Store:Credential', '获取凭证详情成功');
       } catch (error: any) {
         this.error = error.message || '获取凭证详情失败';
-        console.error('获取凭证详情失败:', error);
+        logger.error('Store:Credential', '获取凭证详情失败', { id, error: error.message });
       } finally {
         this.loading = false;
       }
@@ -115,13 +124,16 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始颁发凭证');
+
       try {
-        const credential = await credentialService.issueCredential(credentialData);
-        this.credentials.push(credential);
-        return credential;
+        const { data } = await credentialService.issueCredential(credentialData);
+        this.credentials.push(data);
+        logger.info('Store:Credential', '颁发凭证成功', { id: data.id });
+        return data;
       } catch (error: any) {
         this.error = error.message || '颁发凭证失败';
-        console.error('颁发凭证失败:', error);
+        logger.error('Store:Credential', '颁发凭证失败', { error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -132,12 +144,16 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始验证凭证', { id });
+
       try {
-        this.verificationResult = await credentialService.verifyCredential(id);
-        return this.verificationResult;
+        const { data } = await credentialService.verifyCredential(id);
+        this.verificationResult = data;
+        logger.info('Store:Credential', '验证凭证成功', { result: data.isValid });
+        return data;
       } catch (error: any) {
         this.error = error.message || '验证凭证失败';
-        console.error('验证凭证失败:', error);
+        logger.error('Store:Credential', '验证凭证失败', { id, error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -148,6 +164,8 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始撤销凭证', { id, reason });
+
       try {
         await credentialService.revokeCredential(id, reason);
 
@@ -156,19 +174,21 @@ export const useCredentialStore = defineStore('credential', {
         if (index !== -1) {
           this.credentials[index] = {
             ...this.credentials[index],
-            status: 'revoked',
+            status: CredentialStatus.REVOKED,
           };
         }
 
         if (this.currentCredential?.id === id) {
           this.currentCredential = {
             ...this.currentCredential,
-            status: 'revoked',
+            status: CredentialStatus.REVOKED,
           };
         }
+
+        logger.info('Store:Credential', '撤销凭证成功');
       } catch (error: any) {
         this.error = error.message || '撤销凭证失败';
-        console.error('撤销凭证失败:', error);
+        logger.error('Store:Credential', '撤销凭证失败', { id, error: error.message });
         throw error;
       } finally {
         this.loading = false;
@@ -179,11 +199,15 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始获取凭证模板列表');
+
       try {
-        this.templates = await credentialService.getCredentialTemplates();
+        const { data } = await credentialService.getCredentialTemplates();
+        this.templates = data;
+        logger.info('Store:Credential', '获取凭证模板列表成功', { count: data.length });
       } catch (error: any) {
         this.error = error.message || '获取凭证模板失败';
-        console.error('获取凭证模板失败:', error);
+        logger.error('Store:Credential', '获取凭证模板列表失败', { error: error.message });
       } finally {
         this.loading = false;
       }
@@ -193,13 +217,19 @@ export const useCredentialStore = defineStore('credential', {
       this.loading = true;
       this.error = null;
 
+      logger.info('Store:Credential', '开始基于模板创建凭证', { templateId });
+
       try {
-        const credential = await credentialService.createCredentialFromTemplate(templateId, data);
-        this.credentials.push(credential);
-        return credential;
+        const response = await credentialService.createCredentialFromTemplate(templateId, data);
+        this.credentials.push(response.data);
+        logger.info('Store:Credential', '基于模板创建凭证成功', { id: response.data.id });
+        return response.data;
       } catch (error: any) {
         this.error = error.message || '基于模板创建凭证失败';
-        console.error('基于模板创建凭证失败:', error);
+        logger.error('Store:Credential', '基于模板创建凭证失败', {
+          templateId,
+          error: error.message,
+        });
         throw error;
       } finally {
         this.loading = false;
@@ -208,6 +238,7 @@ export const useCredentialStore = defineStore('credential', {
 
     // 清空状态
     resetState() {
+      logger.info('Store:Credential', '重置凭证状态');
       this.credentials = [];
       this.currentCredential = null;
       this.templates = [];

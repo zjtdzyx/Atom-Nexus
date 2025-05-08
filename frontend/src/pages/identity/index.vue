@@ -61,7 +61,7 @@
         <div class="flex justify-between items-center text-sm">
           <span class="text-textgray">创建于 {{ formatDate(identity.createdAt) }}</span>
           <div class="flex gap-2">
-            <router-link :to="`/identity/${identity.id}`" class="text-neon hover:underline">
+            <router-link :to="`/identity/${identity.id}`" class="text-neon hover:underline" @click="viewDetails(identity.id)">
               管理
             </router-link>
             <button @click="confirmDelete(identity)" class="text-red-400 hover:underline"
@@ -136,6 +136,7 @@
   import { useRouter } from 'vue-router';
   import { useIdentityStore } from '@/stores/identity';
   import type { Identity } from '@/types/identity';
+  import { logger } from '@/utils/logger';
 
   const router = useRouter();
   const identityStore = useIdentityStore();
@@ -159,7 +160,13 @@
 
   // 导航到创建页面
   const navigateToCreate = () => {
+    logger.info('Component:IdentityList', '点击创建新身份按钮');
     router.push('/identity/create');
+  };
+  
+  // 查看身份详情
+  const viewDetails = (id: string) => {
+    logger.info('Component:IdentityList', '查看身份详情', { id });
   };
 
   // 绑定身份
@@ -177,13 +184,16 @@
     }
 
     bindLoading.value = true;
+    logger.info('Component:IdentityList', '开始绑定身份', { did: bindForm.value.did });
 
     try {
       await identityStore.bindIdentity(bindForm.value.did);
       showBindForm.value = false;
       bindForm.value.did = '';
+      logger.info('Component:IdentityList', '身份绑定成功');
     } catch (err: any) {
       bindError.value = err.message || '绑定失败，请稍后重试';
+      logger.error('Component:IdentityList', '身份绑定失败', { error: err.message });
     } finally {
       bindLoading.value = false;
     }
@@ -191,6 +201,7 @@
 
   // 确认删除
   const confirmDelete = (identity: Identity) => {
+    logger.info('Component:IdentityList', '打开删除确认框', { id: identity.id });
     identityToDelete.value = identity;
     showDeleteConfirm.value = true;
   };
@@ -200,13 +211,16 @@
     if (!identityToDelete.value) return;
 
     deleteLoading.value = true;
+    logger.info('Component:IdentityList', '确认删除身份', { id: identityToDelete.value.id });
 
     try {
       await identityStore.deleteIdentity(identityToDelete.value.id);
       showDeleteConfirm.value = false;
       identityToDelete.value = null;
-    } catch (err) {
+      logger.info('Component:IdentityList', '身份删除成功');
+    } catch (err: any) {
       // 错误已在store中处理
+      logger.error('Component:IdentityList', '身份删除失败', { error: err.message });
     } finally {
       deleteLoading.value = false;
     }
@@ -214,14 +228,17 @@
 
   // 组件挂载时获取身份列表
   onMounted(async () => {
+    logger.info('Page:Identity', '页面已加载');
     if (identityStore.identities.length === 0) {
+      logger.info('API:Identity', '开始请求身份列表');
       await identityStore.fetchIdentities();
+      logger.info('API:Identity', '身份列表请求完成');
     }
   });
 </script>
 
 <style scoped>
-  .identity-page {
-    padding: 1.5rem;
+  .card {
+    @apply bg-primary/40 rounded-lg;
   }
 </style>

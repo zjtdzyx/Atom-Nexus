@@ -10,7 +10,7 @@
     "smart-contracts"
   ],
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
+    "dev": "concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\" --names \"frontend,backend\" --prefix-colors \"cyan,yellow\"",
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
@@ -19,7 +19,8 @@
     "dev:frontend": "pnpm --filter atom-nexus-frontend dev",
     "dev:backend": "pnpm --filter atom-nexus-backend start:dev",
     "build:sdk": "pnpm --filter @atom-nexus/sdk build",
-    "compile:contracts": "pnpm --filter atom-nexus-smart-contracts compile"
+    "compile:contracts": "pnpm --filter atom-nexus-smart-contracts compile",
+    "dev:all": "pnpm -r --parallel run dev"
   },
   "keywords": [
     "DID",
@@ -36,9 +37,10 @@
   },
   "packageManager": "pnpm@8.6.0",
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^8.0.0",
     "prettier": "^3.0.0",
-    "rimraf": "^5.0.0"
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
   }
-} 
+}
