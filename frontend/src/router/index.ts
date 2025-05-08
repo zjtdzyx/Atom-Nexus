@@ -31,6 +31,15 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'identity/:id',
+        name: 'IdentityDetail',
+        component: () => import('../pages/identity/[id].vue'),
+        meta: {
+          title: '身份详情',
+          requiresAuth: true,
+        },
+      },
+      {
         path: 'identity/login-history',
         name: 'IdentityLoginHistory',
         component: () => import('../pages/identity/login-history/index.vue'),

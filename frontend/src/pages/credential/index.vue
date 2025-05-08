@@ -1,14 +1,17 @@
 <template>
-  <div class="credential-page">
-    <h1 class="text-2xl font-bold mb-6">凭证管理</h1>
-    <p class="mb-4">管理您的去中心化身份凭证，包括证书、许可和资格认证等数字证明。</p>
+  <div class="container mx-auto py-10 px-4">
+    <h1 class="text-3xl font-bold text-textlight mb-8">凭证管理</h1>
 
-    <!-- 凭证管理区域内容将根据业务需求实现 -->
+    <div class="bg-primary/40 p-6 rounded-lg mb-8">
+      <p class="text-textgray mb-4">凭证管理页面正在建设中，即将上线...</p>
+      <p class="text-textgray">您可以先使用<router-link to="/identity" class="text-neon hover:underline">身份管理</router-link>功能
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  // 凭证管理相关逻辑
+  // 凭证管理页面逻辑
 </script>
 
 <style scoped>

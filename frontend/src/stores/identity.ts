@@ -77,6 +77,27 @@ export const useIdentityStore = defineStore('identity', {
       }
     },
 
+    async bindIdentity(did: string) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const newIdentity = await identityService.createIdentity({
+          did,
+          name: `身份 ${this.identities.length + 1}`,
+          status: 'active',
+        });
+        this.identities.push(newIdentity);
+        return newIdentity;
+      } catch (error: any) {
+        this.error = error.message || '绑定身份失败';
+        console.error('绑定身份失败:', error);
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async updateIdentity(id: string, identity: Partial<Identity>) {
       this.loading = true;
       this.error = null;

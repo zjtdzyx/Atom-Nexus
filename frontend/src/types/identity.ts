@@ -9,6 +9,8 @@ export interface Identity {
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
+  status: 'active' | 'inactive' | 'revoked';
+  type?: string;
   metadata?: Record<string, any>;
 }
 

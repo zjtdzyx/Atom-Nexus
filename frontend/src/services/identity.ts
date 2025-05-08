@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Identity, LoginHistory } from '@/types/identity';
+import type { Identity, LoginHistory, IdentityProfile } from '@/types/identity';
 
 const API_BASE_URL = '/api/identity';
 
@@ -68,7 +68,7 @@ export const identityService = {
    * 获取身份资料
    * @param identityId 身份ID
    */
-  async getProfile(identityId: string): Promise<any> {
+  async getProfile(identityId: string): Promise<IdentityProfile> {
     const response = await axios.get(`${API_BASE_URL}/${identityId}/profile`);
     return response.data;
   },
@@ -78,8 +78,25 @@ export const identityService = {
    * @param identityId 身份ID
    * @param profileData 资料数据
    */
-  async updateProfile(identityId: string, profileData: any): Promise<any> {
+  async updateProfile(identityId: string, profileData: IdentityProfile): Promise<IdentityProfile> {
     const response = await axios.put(`${API_BASE_URL}/${identityId}/profile`, profileData);
     return response.data;
+  },
+
+  /**
+   * 绑定现有DID到身份
+   * @param did DID标识符
+   */
+  async bindDid(did: string): Promise<Identity> {
+    const response = await axios.post(`${API_BASE_URL}/bind`, { did });
+    return response.data;
+  },
+
+  /**
+   * 解绑DID
+   * @param identityId 身份ID
+   */
+  async unbindDid(identityId: string): Promise<void> {
+    await axios.post(`${API_BASE_URL}/${identityId}/unbind`);
   },
 };
