@@ -43,8 +43,6 @@
 ## 开发指南
 
 ```bash
-# 安装依赖
-pnpm install
 
 # 开发模式启动
 pnpm start:dev

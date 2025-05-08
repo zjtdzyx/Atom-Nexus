@@ -1,5 +1,5 @@
 <template>
-  <div class="permissions-home-page">
+  <div class="container mx-auto py-10 px-4">
     <div class="page-header mb-6">
       <h1 class="text-2xl font-bold text-textlight">权限管理</h1>
       <p class="text-textgray mt-2">管理您的凭证授权和DID权限设置</p>
@@ -9,7 +9,7 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <!-- 设置权限卡片 -->
       <div class="feature-card hover:transform hover:-translate-y-2 transition-all duration-300"
-        @click="router.push('/permissions/set')">
+        @click="router.push('/permission/set')">
         <div class="rounded-full w-12 h-12 flex items-center justify-center bg-neon/20 mb-4">
           <div class="i-carbon-security text-neon text-2xl"></div>
         </div>
@@ -22,7 +22,7 @@
 
       <!-- 审计日志卡片 -->
       <div class="feature-card hover:transform hover:-translate-y-2 transition-all duration-300"
-        @click="router.push('/permissions/audit')">
+        @click="router.push('/permission/audit')">
         <div class="rounded-full w-12 h-12 flex items-center justify-center bg-neon/20 mb-4">
           <div class="i-carbon-activity text-neon text-2xl"></div>
         </div>
@@ -86,7 +86,7 @@
                 <p class="text-sm text-textgray">{{ formatTimestamp(log.timestamp) }}</p>
               </div>
             </div>
-            <button class="text-neon text-sm hover:underline" @click="router.push(`/permissions/${log.targetDid}`)">
+            <button class="text-neon text-sm hover:underline" @click="router.push(`/permission/${log.targetDid}`)">
               查看详情
             </button>
           </div>
@@ -113,8 +113,8 @@
 <script setup lang="ts">
   import { ref, computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-  import { usePermissionStore } from '../../stores/permission';
-  import type { AuditLog } from '../../stores/permission';
+  import { usePermissionStore } from '@/stores/permission';
+  import type { AuditLog } from '@/stores/permission';
 
   const router = useRouter();
   const permissionStore = usePermissionStore();
@@ -133,7 +133,7 @@
   const searchDidPermissions = () => {
     if (!isValidDid.value) return;
 
-    router.push(`/permissions/${searchDid.value}`);
+    router.push(`/permission/${searchDid.value}`);
   };
 
   // 获取最近日志
@@ -195,22 +195,6 @@
 </script>
 
 <style scoped>
-  .permissions-home-page {
-    animation: fade-in 0.4s ease-out;
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
   .feature-card {
     background-color: rgba(30, 30, 47, 0.5);
     backdrop-filter: blur(8px);

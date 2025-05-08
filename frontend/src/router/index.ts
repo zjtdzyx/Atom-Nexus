@@ -1,191 +1,220 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 
+// -- AUTO-IMPORT ROUTES START --
+// 这里会自动导入路由组件
+// -- AUTO-IMPORT ROUTES END --
+
 // 路由配置
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('../layouts/MainLayout.vue'),
     children: [
+      // -- AUTO-ROUTES START --
       {
         path: '',
-        name: 'Dashboard',
-        component: () => import('../pages/Dashboard.vue'),
+        name: 'Home',
+        component: () => import('../pages/home/index.vue'),
+        meta: {
+          title: '首页',
+          requiresAuth: false,
+        },
       },
       {
         path: 'identity',
         name: 'Identity',
-        component: () => import('../pages/Identity.vue'),
-      },
-      {
-        path: 'identities',
-        name: 'IdentityList',
-        component: () => import('../pages/identities/IdentityListPage.vue'),
+        component: () => import('../pages/identity/index.vue'),
         meta: {
           title: '身份管理',
           requiresAuth: true,
         },
       },
       {
-        path: 'identities/:id',
+        path: 'identity/:id',
         name: 'IdentityDetail',
-        component: () => import('../pages/identities/IdentityDetailPage.vue'),
+        component: () => import('../pages/identity/[id].vue'),
         meta: {
           title: '身份详情',
           requiresAuth: true,
         },
       },
       {
-        path: 'credentials',
-        name: 'Credentials',
-        component: () => import('../pages/Credentials.vue'),
+        path: 'identity/login-history',
+        name: 'IdentityLoginHistory',
+        component: () => import('../pages/identity/login-history/index.vue'),
+        meta: {
+          title: '登录历史',
+          requiresAuth: true,
+        },
       },
       {
-        path: 'credential/:id',
-        name: 'CredentialDetail',
-        component: () => import('../pages/CredentialDetail.vue'),
+        path: 'identity/profile',
+        name: 'IdentityProfile',
+        component: () => import('../pages/identity/profile/index.vue'),
+        meta: {
+          title: '身份资料',
+          requiresAuth: true,
+        },
       },
       {
-        path: 'permissions/set',
+        path: 'credential',
+        name: 'Credential',
+        component: () => import('../pages/credential/index.vue'),
+        meta: {
+          title: '凭证管理',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'credential/issue',
+        name: 'CredentialIssue',
+        component: () => import('../pages/credential/issue/index.vue'),
+        meta: {
+          title: '颁发凭证',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'credential/verify',
+        name: 'CredentialVerify',
+        component: () => import('../pages/credential/verify/index.vue'),
+        meta: {
+          title: '验证凭证',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'developer',
+        name: 'Developer',
+        component: () => import('../pages/developer/index.vue'),
+        meta: {
+          title: '开发者工具',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'developer/sdk',
+        name: 'DeveloperSdk',
+        component: () => import('../pages/developer/sdk/index.vue'),
+        meta: {
+          title: '开发者SDK',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'developer/api',
+        name: 'DeveloperApi',
+        component: () => import('../pages/developer/api/index.vue'),
+        meta: {
+          title: 'API文档',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'about',
+        name: 'About',
+        component: () => import('../pages/about/index.vue'),
+        meta: {
+          title: '关于我们',
+          requiresAuth: false,
+        },
+      },
+      {
+        path: 'account',
+        name: 'Account',
+        component: () => import('../pages/account/index.vue'),
+        meta: {
+          title: '个人中心',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'account/settings',
+        name: 'AccountSettings',
+        component: () => import('../pages/account/settings/index.vue'),
+        meta: {
+          title: '账户设置',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'account/security',
+        name: 'AccountSecurity',
+        component: () => import('../pages/account/security/index.vue'),
+        meta: {
+          title: '账户安全',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('../pages/settings/index.vue'),
+        meta: {
+          title: '设置中心',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'permission',
+        name: 'Permission',
+        component: () => import('../pages/permission/index.vue'),
+        meta: {
+          title: '权限管理',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'permission/set',
         name: 'PermissionSet',
-        component: () => import('../pages/permissions/PermissionSetPage.vue'),
+        component: () => import('../pages/permission/set/index.vue'),
         meta: {
           title: '权限设置',
           requiresAuth: true,
         },
       },
       {
-        path: 'permissions/audit',
+        path: 'permission/audit',
         name: 'PermissionAudit',
-        component: () => import('../pages/permissions/PermissionAuditPage.vue'),
+        component: () => import('../pages/permission/audit/index.vue'),
         meta: {
           title: '权限审计',
           requiresAuth: true,
         },
       },
       {
-        path: 'permissions/:did',
-        name: 'DidPermission',
-        component: () => import('../pages/permissions/DidPermissionPage.vue'),
+        path: 'identity/create',
+        name: 'IdentityCreate',
+        component: () => import('../pages/identity/create/index.vue'),
         meta: {
-          title: 'DID权限',
+          title: '创建身份',
           requiresAuth: true,
         },
       },
+      // -- AUTO-ROUTES END --
+    ],
+  },
+  {
+    path: '/auth',
+    component: () => import('../layouts/AuthLayout.vue'),
+    children: [
       {
-        path: 'permissions',
-        name: 'Permissions',
-        component: () => import('../pages/Permissions.vue'),
-      },
-      {
-        path: 'settings',
-        name: 'Settings',
-        component: () => import('../pages/Settings.vue'),
-      },
-      {
-        path: 'apps',
-        name: 'Apps',
-        component: () => import('../pages/Apps.vue'),
-      },
-      // 用户模块路由配置
-      {
-        path: 'user/profile',
-        name: 'UserProfile',
-        component: () => import('../pages/user/ProfilePage.vue'),
-        meta: {
-          title: '用户资料',
-          requiresAuth: true,
-        },
-      },
-      {
-        path: 'user/login',
-        name: 'UserLogin',
-        component: () => import('../pages/user/LoginPage.vue'),
+        path: 'login',
+        name: 'Login',
+        component: () => import('../pages/auth/login.vue'),
         meta: {
           title: '用户登录',
           requiresAuth: false,
         },
       },
-      // 存储模块路由配置
       {
-        path: 'storage',
-        name: 'StorageUpload',
-        component: () => import('../pages/storage/UploadPage.vue'),
+        path: 'register',
+        name: 'Register',
+        component: () => import('../pages/auth/register.vue'),
         meta: {
-          title: '上传数据',
-          requiresAuth: true,
-        },
-      },
-      {
-        path: 'storage/upload',
-        redirect: '/storage',
-      },
-      {
-        path: 'storage/view',
-        name: 'StorageDataView',
-        component: () => import('../pages/storage/DataViewPage.vue'),
-        meta: {
-          title: '数据访问',
-          requiresAuth: true,
-        },
-      },
-      {
-        path: 'storage/:cid',
-        name: 'StorageDataDetail',
-        component: () => import('../pages/storage/DataViewPage.vue'),
-        meta: {
-          title: '数据详情',
-          requiresAuth: true,
-        },
-      },
-      {
-        path: 'storage/indexes',
-        name: 'StorageIndexes',
-        component: () => import('../pages/storage/IndexesPage.vue'),
-        meta: {
-          title: '索引记录',
-          requiresAuth: true,
-        },
-      },
-      // 管理模块路由配置
-      {
-        path: 'admin/users',
-        name: 'AdminUsers',
-        component: () => import('../pages/admin/UserManagementPage.vue'),
-        meta: {
-          title: '用户管理',
-          requiresAuth: true,
-          requiresAdmin: true,
-        },
-      },
-      {
-        path: 'admin/credentials',
-        name: 'AdminCredentials',
-        component: () => import('../pages/admin/CredentialRecordsPage.vue'),
-        meta: {
-          title: '凭证记录',
-          requiresAuth: true,
-          requiresAdmin: true,
-        },
-      },
-      {
-        path: 'admin/permissions',
-        name: 'AdminPermissions',
-        component: () => import('../pages/admin/PermissionManagementPage.vue'),
-        meta: {
-          title: '权限管理',
-          requiresAuth: true,
-          requiresAdmin: true,
-        },
-      },
-      {
-        path: 'admin/stats',
-        name: 'AdminStats',
-        component: () => import('../pages/admin/SystemStatsPage.vue'),
-        meta: {
-          title: '系统统计',
-          requiresAuth: true,
-          requiresAdmin: true,
+          title: '用户注册',
+          requiresAuth: false,
         },
       },
     ],
@@ -193,7 +222,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: () => import('../pages/NotFound.vue'),
+    component: () => import('../pages/error/NotFound.vue'),
   },
 ];
 

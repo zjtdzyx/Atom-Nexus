@@ -16,10 +16,10 @@
     "lint": "pnpm -r run lint",
     "format": "pnpm -r run format",
     "clean": "powershell -File ./clean.ps1",
-    "frontend:dev": "pnpm --filter frontend dev",
-    "backend:dev": "pnpm --filter atom-nexus-backend start:dev",
-    "sdk:build": "pnpm --filter @atom-nexus/sdk build",
-    "contracts:compile": "pnpm --filter atom-nexus-smart-contracts compile"
+    "dev:frontend": "pnpm --filter atom-nexus-frontend dev",
+    "dev:backend": "pnpm --filter atom-nexus-backend start:dev",
+    "build:sdk": "pnpm --filter @atom-nexus/sdk build",
+    "compile:contracts": "pnpm --filter atom-nexus-smart-contracts compile"
   },
   "keywords": [
     "DID",

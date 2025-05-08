@@ -1,14 +1,20 @@
 <template>
   <div class="home-page">
+    <!-- 导航栏 -->
+    <Navbar />
+
     <!-- Hero 区域 -->
     <HeroSection />
-    
+
     <!-- 特性介绍 -->
     <FeaturesSection />
-    
+
     <!-- 功能模块 -->
     <ModulesSection />
-    
+
+    <!-- 开发者专区 -->
+    <DeveloperSection />
+
     <!-- CTA 区域 -->
     <section class="cta-section py-20 relative overflow-hidden">
       <div class="container">
@@ -23,29 +29,35 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 背景效果 -->
       <div class="absolute inset-0 bg-gradient-radial z-0"></div>
     </section>
+
+    <!-- 页脚 -->
+    <FooterSection />
   </div>
 </template>
 
 <script setup lang="ts">
-import HeroSection from '@/components/home/HeroSection.vue';
-import FeaturesSection from '@/components/home/FeaturesSection.vue';
-import ModulesSection from '@/components/home/ModulesSection.vue';
+  import HeroSection from '@/components/home/HeroSection.vue';
+  import FeaturesSection from '@/components/home/FeaturesSection.vue';
+  import ModulesSection from '@/components/home/ModulesSection.vue';
+  import DeveloperSection from '@/components/home/DeveloperSection.vue';
+  import Navbar from '@/components/home/Navbar.vue';
+  import FooterSection from '@/components/home/FooterSection.vue';
 </script>
 
 <style scoped>
-.home-page {
-  min-height: 100vh;
-}
+  .home-page {
+    min-height: 100vh;
+  }
 
-.cta-section {
-  background-color: var(--color-darkbg);
-}
+  .cta-section {
+    background-color: var(--color-darkbg);
+  }
 
-.bg-gradient-radial {
-  background: radial-gradient(circle at center, rgba(155, 77, 202, 0.2) 0%, rgba(30, 30, 47, 0) 70%);
-}
-</style> 
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, rgba(155, 77, 202, 0.2) 0%, rgba(30, 30, 47, 0) 70%);
+  }
+</style>
