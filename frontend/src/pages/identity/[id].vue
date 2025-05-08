@@ -186,7 +186,7 @@
   const editForm = ref({
     name: '',
     type: '',
-    status: ''
+    status: '' as 'active' | 'inactive' | 'revoked'
   });
 
   // 当前身份

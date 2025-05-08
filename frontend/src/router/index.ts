@@ -156,6 +156,42 @@ const routes: RouteRecordRaw[] = [
           requiresAuth: true,
         },
       },
+      {
+        path: 'permission',
+        name: 'Permission',
+        component: () => import('../pages/permission/index.vue'),
+        meta: {
+          title: '权限管理',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'permission/set',
+        name: 'PermissionSet',
+        component: () => import('../pages/permission/set/index.vue'),
+        meta: {
+          title: '权限设置',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'permission/audit',
+        name: 'PermissionAudit',
+        component: () => import('../pages/permission/audit/index.vue'),
+        meta: {
+          title: '权限审计',
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'identity/create',
+        name: 'IdentityCreate',
+        component: () => import('../pages/identity/create/index.vue'),
+        meta: {
+          title: '创建身份',
+          requiresAuth: true,
+        },
+      },
       // -- AUTO-ROUTES END --
     ],
   },
