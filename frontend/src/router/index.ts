@@ -86,6 +86,15 @@ const routes: RouteRecordRaw[] = [
         },
       },
       {
+        path: 'credential/:id',
+        name: 'CredentialDetail',
+        component: () => import('../pages/credential/[id].vue'),
+        meta: {
+          title: '凭证详情',
+          requiresAuth: true,
+        },
+      },
+      {
         path: 'developer',
         name: 'Developer',
         component: () => import('../pages/developer/index.vue'),

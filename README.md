@@ -1,4 +1,4 @@
-# Atom Nexus - 去中心化数字身份管理系统 🎯
+# Atom Nexus - 去中心化数字身份管理系统 🎯 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zjtdzyx/atom-nexus)
 
 > 我的2026年毕业设计项目
 
@@ -14,7 +14,6 @@ Atom Nexus 是一个面向个人和企业的去中心化数字身份管理系统
 ## 🚀 在线预览
 ⚠️ *开发中...*  
 敬请期待部署在 Vercel / Railway 的在线版本！
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/zjtdzyx/atom-nexus)
 
 ## 💡 核心功能
 

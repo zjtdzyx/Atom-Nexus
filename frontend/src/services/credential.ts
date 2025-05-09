@@ -1,9 +1,12 @@
-import axios from 'axios';
-import type { AxiosResponse } from 'axios';
-import type { Credential, VerificationResult, CredentialTemplate } from '@/types/credential';
-import { logger } from '@/utils/logger';
+import { http } from '../utils/http';
+import type { Credential, VerifyResult } from '../stores/credential';
 
-const API_BASE_URL = '/api/credential';
+// 统一API响应格式
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
 
 /**
  * 凭证管理API服务
@@ -11,69 +14,42 @@ const API_BASE_URL = '/api/credential';
 export const credentialService = {
   /**
    * 获取凭证列表
-   * @param page 页码
-   * @param limit 每页条数
+   * @param params 查询参数
    */
-  async getCredentials(page = 1, limit = 10): Promise<AxiosResponse<Credential[]>> {
-    logger.info('API:Credential', '开始请求凭证列表', { page, limit });
-    try {
-      const response = await axios.get(`${API_BASE_URL}/list`, {
-        params: { page, limit },
-      });
-      logger.info('API:Credential', '请求凭证列表成功', { count: response.data.length });
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '请求凭证列表失败', { error: error.message });
-      throw error;
-    }
+  getCredentials(params?: any): Promise<ApiResponse<Credential[]>> {
+    return http.get('/api/credential', { params });
   },
 
   /**
    * 获取凭证详情
    * @param id 凭证ID
    */
-  async getCredentialById(id: string): Promise<AxiosResponse<Credential>> {
-    logger.info('API:Credential', '开始请求凭证详情', { id });
-    try {
-      const response = await axios.get(`${API_BASE_URL}/${id}`);
-      logger.info('API:Credential', '请求凭证详情成功');
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '请求凭证详情失败', { id, error: error.message });
-      throw error;
-    }
+  getCredentialById(id: string): Promise<ApiResponse<Credential>> {
+    return http.get(`/api/credential/${id}`);
   },
 
   /**
    * 颁发新凭证
-   * @param credentialData 凭证数据
+   * @param data 凭证数据
    */
-  async issueCredential(credentialData: Partial<Credential>): Promise<AxiosResponse<Credential>> {
-    logger.info('API:Credential', '开始颁发凭证');
-    try {
-      const response = await axios.post(`${API_BASE_URL}/issue`, credentialData);
-      logger.info('API:Credential', '颁发凭证成功', { id: response.data.id });
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '颁发凭证失败', { error: error.message });
-      throw error;
-    }
+  issueCredential(data: any): Promise<ApiResponse<Credential>> {
+    return http.post('/api/credential/issue', data);
   },
 
   /**
    * 验证凭证
    * @param id 凭证ID
    */
-  async verifyCredential(id: string): Promise<AxiosResponse<VerificationResult>> {
-    logger.info('API:Credential', '开始验证凭证', { id });
-    try {
-      const response = await axios.post(`${API_BASE_URL}/${id}/verify`);
-      logger.info('API:Credential', '验证凭证成功', { result: response.data.isValid });
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '验证凭证失败', { id, error: error.message });
-      throw error;
-    }
+  verifyCredential(id: string): Promise<ApiResponse<VerifyResult>> {
+    return http.post(`/api/credential/${id}/verify`);
+  },
+
+  /**
+   * 验证凭证（通过上传JSON）
+   * @param credentialJson 凭证JSON
+   */
+  verifyCredentialJson(credentialJson: any): Promise<ApiResponse<VerifyResult>> {
+    return http.post('/api/credential/verify', { credential: credentialJson });
   },
 
   /**
@@ -81,67 +57,69 @@ export const credentialService = {
    * @param id 凭证ID
    * @param reason 撤销原因
    */
-  async revokeCredential(id: string, reason?: string): Promise<AxiosResponse<void>> {
-    logger.info('API:Credential', '开始撤销凭证', { id, reason });
-    try {
-      const response = await axios.post(`${API_BASE_URL}/${id}/revoke`, { reason });
-      logger.info('API:Credential', '撤销凭证成功');
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '撤销凭证失败', { id, error: error.message });
-      throw error;
-    }
+  revokeCredential(id: string, reason?: string): Promise<ApiResponse<void>> {
+    return http.post(`/api/credential/${id}/revoke`, { reason });
   },
 
   /**
-   * 更新凭证状态
+   * 删除凭证（从本地存储中）
    * @param id 凭证ID
-   * @param status 新状态
    */
-  async updateCredentialStatus(id: string, status: string): Promise<AxiosResponse<Credential>> {
-    logger.info('API:Credential', '开始更新凭证状态', { id, status });
-    try {
-      const response = await axios.put(`${API_BASE_URL}/${id}/status`, { status });
-      logger.info('API:Credential', '更新凭证状态成功');
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '更新凭证状态失败', { id, error: error.message });
-      throw error;
-    }
+  deleteCredential(id: string): Promise<ApiResponse<void>> {
+    return http.delete(`/api/credential/${id}`);
   },
 
   /**
    * 获取凭证模板列表
    */
-  async getCredentialTemplates(): Promise<AxiosResponse<CredentialTemplate[]>> {
-    logger.info('API:Credential', '开始请求凭证模板列表');
-    try {
-      const response = await axios.get(`${API_BASE_URL}/templates`);
-      logger.info('API:Credential', '请求凭证模板列表成功', { count: response.data.length });
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '请求凭证模板列表失败', { error: error.message });
-      throw error;
-    }
+  getCredentialTemplates(): Promise<ApiResponse<any[]>> {
+    return http.get('/api/credential/templates');
   },
 
   /**
-   * 根据模板创建凭证
-   * @param templateId 模板ID
-   * @param data 凭证数据
+   * 获取凭证共享链接
+   * @param id 凭证ID
+   * @param options 选项
    */
-  async createCredentialFromTemplate(
-    templateId: string,
-    data: any
-  ): Promise<AxiosResponse<Credential>> {
-    logger.info('API:Credential', '开始基于模板创建凭证', { templateId });
-    try {
-      const response = await axios.post(`${API_BASE_URL}/templates/${templateId}/create`, data);
-      logger.info('API:Credential', '基于模板创建凭证成功', { id: response.data.id });
-      return response;
-    } catch (error: any) {
-      logger.error('API:Credential', '基于模板创建凭证失败', { templateId, error: error.message });
-      throw error;
-    }
+  getCredentialShareLink(
+    id: string,
+    options?: any
+  ): Promise<ApiResponse<{ url: string; expiresAt?: string }>> {
+    return http.post(`/api/credential/${id}/share`, options);
+  },
+
+  /**
+   * 获取凭证历史记录
+   * @param id 凭证ID
+   */
+  getCredentialHistory(id: string): Promise<ApiResponse<any[]>> {
+    return http.get(`/api/credential/${id}/history`);
+  },
+
+  /**
+   * 根据DID获取所有凭证
+   * @param did DID
+   */
+  getCredentialsByDid(did: string): Promise<ApiResponse<Credential[]>> {
+    return http.get('/api/credential', { params: { did } });
+  },
+
+  /**
+   * 导出凭证
+   * @param id 凭证ID
+   * @param format 格式
+   */
+  exportCredential(
+    id: string,
+    format: 'json' | 'jwt' | 'jsonld' = 'json'
+  ): Promise<ApiResponse<any>> {
+    return http.get(`/api/credential/${id}/export`, { params: { format } });
+  },
+
+  /**
+   * 获取凭证统计信息
+   */
+  getCredentialStats(): Promise<ApiResponse<any>> {
+    return http.get('/api/credential/stats');
   },
 };

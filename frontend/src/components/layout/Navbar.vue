@@ -59,7 +59,7 @@
   const menuItems = [
     { title: '首页', path: '/' },
     { title: '身份管理', path: '/identity' },
-    { title: '凭证管理', path: '/credentials' },
+    { title: '凭证管理', path: '/credential' },
     { title: '开发者工具', path: '/developer' },
     { title: '关于我们', path: '/about' },
   ];

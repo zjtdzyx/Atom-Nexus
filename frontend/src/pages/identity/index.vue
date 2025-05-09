@@ -1,130 +1,228 @@
 <template>
-  <div class="container mx-auto py-10 px-4">
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-3xl font-bold text-textlight">我的身份列表</h1>
-
-      <button @click="showBindForm = true" class="btn-primary flex items-center">
-        <div class="i-carbon-add mr-2"></div>
-        绑定新身份
-      </button>
-    </div>
-
-    <!-- 加载状态 -->
-    <div v-if="identityStore.loading" class="flex justify-center py-10">
-      <div class="i-carbon-circle-dash animate-spin text-4xl text-neon"></div>
-    </div>
-
-    <!-- 错误消息 -->
-    <div v-else-if="identityStore.error" class="bg-red-500/20 text-red-400 p-4 rounded-lg mb-6">
-      <div class="flex items-center">
-        <div class="i-carbon-warning-filled text-xl mr-2"></div>
-        <p>{{ identityStore.error }}</p>
-      </div>
-    </div>
-
-    <!-- 空状态 -->
-    <div v-else-if="identityStore.identities.length === 0" class="card p-8 text-center">
-      <div class="i-carbon-user-profile text-5xl mx-auto mb-4 text-metal"></div>
-      <h3 class="text-xl font-medium text-textlight mb-2">您还没有绑定任何身份</h3>
-      <p class="text-textgray mb-6">通过创建或绑定DID开始使用Atom Nexus的身份管理功能</p>
-      <div class="flex gap-4 justify-center">
-        <button @click="showBindForm = true" class="btn-primary">绑定已有DID</button>
-        <button @click="navigateToCreate" class="btn-secondary">创建新身份</button>
-      </div>
-    </div>
-
-    <!-- 身份列表 -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="identity in identityStore.identities" :key="identity.id"
-        class="card p-5 hover:shadow-neon/20 hover:shadow-lg transition-all duration-300">
-        <div class="flex justify-between items-start mb-4">
-          <div class="flex items-center">
-            <div class="i-carbon-user-profile text-2xl text-neon mr-2"></div>
-            <h3 class="text-lg font-medium text-textlight">{{ identity.type || '主要身份' }}</h3>
+  <div class="identity-manager">
+    <!-- 页面标题和操作按钮 -->
+    <div class="page-header py-8">
+      <div class="container">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h1 class="text-2xl font-bold text-textlight mb-2">身份管理</h1>
+            <p class="text-textgray">管理您的数字身份和DID</p>
           </div>
-          <div :class="{
-            'bg-neon/20 text-neon': identity.status === 'active',
-            'bg-orange-500/20 text-orange-400': identity.status === 'inactive',
-            'bg-red-500/20 text-red-400': identity.status === 'revoked'
-          }" class="px-2 py-1 text-xs rounded-full">
-            {{
-              identity.status === 'active' ? '活跃' :
-                identity.status === 'inactive' ? '未激活' : '已撤销'
-            }}
-          </div>
-        </div>
-
-        <div class="text-xs font-mono bg-darkbg p-2 rounded mb-4 overflow-hidden text-textgray">
-          {{ identity.did }}
-        </div>
-
-        <div class="flex justify-between items-center text-sm">
-          <span class="text-textgray">创建于 {{ formatDate(identity.createdAt) }}</span>
-          <div class="flex gap-2">
-            <router-link :to="`/identity/${identity.id}`" class="text-neon hover:underline" @click="viewDetails(identity.id)">
-              管理
-            </router-link>
-            <button @click="confirmDelete(identity)" class="text-red-400 hover:underline"
-              v-if="identity.status !== 'revoked'">
-              删除
+          <div class="flex space-x-4">
+            <button class="btn-secondary" @click="openBindModal">
+              <span class="i-carbon-add-alt mr-1"></span>绑定DID
+            </button>
+            <button class="btn-primary" @click="navigateToCreate">
+              <span class="i-carbon-add mr-1"></span>创建新身份
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 绑定DID表单对话框 -->
-    <div v-if="showBindForm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div class="bg-primary p-6 rounded-lg shadow-xl w-full max-w-md" @click.stop>
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-semibold text-textlight">绑定已有DID</h3>
-          <button @click="showBindForm = false" class="text-metal hover:text-textlight">
-            <div class="i-carbon-close text-xl"></div>
+    <!-- 主内容区 -->
+    <div class="container py-6">
+      <!-- 加载状态 -->
+      <div v-if="identityStore.isLoading" class="flex justify-center py-12">
+        <div class="i-carbon-circle-dash animate-spin text-4xl text-neon"></div>
+      </div>
+
+      <!-- 错误提示 -->
+      <div v-else-if="identityStore.error" class="bg-red-500/20 text-red-500 p-4 rounded-lg mb-6">
+        <p>{{ identityStore.error }}</p>
+        <button class="mt-2 px-4 py-2 bg-red-500 text-white rounded-md" @click="identityStore.fetchIdentities">
+          重试
+        </button>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-else-if="identityStore.identities.length === 0" class="empty-state text-center py-16">
+        <div class="i-carbon-identification text-6xl text-textgray mx-auto mb-4"></div>
+        <h3 class="text-xl font-medium text-textlight mb-2">您还没有数字身份</h3>
+        <p class="text-textgray mb-6">创建或绑定DID以开始使用Atom Nexus</p>
+        <div class="flex justify-center space-x-4">
+          <button class="btn-secondary" @click="openBindModal">
+            绑定DID
+          </button>
+          <button class="btn-primary" @click="navigateToCreate">
+            创建新身份
           </button>
         </div>
+      </div>
 
-        <div class="mb-6">
-          <label class="block text-textgray mb-2">DID 标识符</label>
-          <input v-model="bindForm.did" placeholder="输入以did:开头的身份标识符"
-            class="input w-full bg-darkbg text-textlight border-metal/20" />
-          <p class="text-xs text-textgray mt-1">例如: did:key:z6MkvTPicF..., did:ethr:0x...</p>
-          <div v-if="bindError" class="text-red-400 text-sm mt-2">{{ bindError }}</div>
+      <!-- 身份列表 -->
+      <div v-else class="identity-list">
+        <!-- 列表筛选 -->
+        <div class="filters flex justify-between items-center mb-6">
+          <div class="flex items-center space-x-4">
+            <div class="search-box relative">
+              <input v-model="searchQuery" type="text" placeholder="搜索身份..." class="input pr-10">
+              <span class="i-carbon-search absolute right-3 top-1/2 transform -translate-y-1/2 text-textgray"></span>
+            </div>
+            <div class="filter-dropdown">
+              <select v-model="statusFilter" class="input">
+                <option value="all">所有状态</option>
+                <option value="active">活跃</option>
+                <option value="inactive">非活跃</option>
+                <option value="revoked">已撤销</option>
+              </select>
+            </div>
+          </div>
+          <div class="sort-dropdown">
+            <select v-model="sortOrder" class="input">
+              <option value="newest">最新创建</option>
+              <option value="oldest">最早创建</option>
+              <option value="az">名称 A-Z</option>
+              <option value="za">名称 Z-A</option>
+            </select>
+          </div>
         </div>
 
-        <div class="flex justify-end space-x-3">
-          <button @click="showBindForm = false" class="btn-secondary">取消</button>
-          <button @click="bindIdentity" class="btn-primary" :class="{ 'opacity-50 cursor-not-allowed': bindLoading }"
-            :disabled="bindLoading">
-            <span v-if="bindLoading" class="i-carbon-circle-dash animate-spin mr-2"></span>
-            绑定
-          </button>
+        <!-- 身份列表内容 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="identity in filteredIdentities" :key="identity.id"
+            class="card hover:bg-primary/20 hover:border-neon/50 transition-all duration-200">
+            <!-- 身份卡片内容 -->
+            <div class="identity-card">
+              <!-- 基本信息 -->
+              <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="avatar-wrapper mr-3 relative">
+                    <div
+                      class="w-12 h-12 rounded-full bg-violet/20 flex items-center justify-center text-neon overflow-hidden">
+                      <img v-if="identity.metadata?.avatar" :src="identity.metadata.avatar" alt="Avatar"
+                        class="w-full h-full object-cover">
+                      <span v-else class="text-xl">{{ identity.alias.charAt(0).toUpperCase() }}</span>
+                    </div>
+                    <div v-if="identity.isDefault"
+                      class="absolute -top-1 -right-1 w-5 h-5 bg-neon rounded-full flex items-center justify-center">
+                      <span class="i-carbon-star-filled text-xs text-primary"></span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-medium text-textlight">{{ identity.alias }}</h3>
+                    <div class="flex items-center">
+                      <span class="text-xs text-textgray">{{ identity.method }}</span>
+                      <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="{
+                        'bg-green-500/20 text-green-500': identity.status === 'active',
+                        'bg-yellow-500/20 text-yellow-500': identity.status === 'inactive',
+                        'bg-red-500/20 text-red-500': identity.status === 'revoked'
+                      }">
+                        {{
+                          identity.status === 'active' ? '活跃' :
+                            identity.status === 'inactive' ? '非活跃' : '已撤销'
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="actions relative">
+                  <button @click.stop="toggleDropdown(identity.id)" class="p-1">
+                    <span class="i-carbon-overflow-menu-vertical text-textgray"></span>
+                  </button>
+                  <!-- 下拉菜单 -->
+                  <div v-if="openDropdown === identity.id"
+                    class="dropdown absolute right-0 top-8 w-48 bg-primary z-10 rounded-lg shadow-lg p-2">
+                    <ul>
+                      <li>
+                        <router-link :to="`/identity/${identity.id}`" class="dropdown-item">
+                          <span class="i-carbon-view mr-2"></span>查看详情
+                        </router-link>
+                      </li>
+                      <li v-if="!identity.isDefault">
+                        <button class="dropdown-item" @click="setAsDefault(identity)">
+                          <span class="i-carbon-star mr-2"></span>设为默认
+                        </button>
+                      </li>
+                      <li v-if="identity.status === 'active'">
+                        <button class="dropdown-item text-yellow-500" @click="deactivateIdentity(identity)">
+                          <span class="i-carbon-pause mr-2"></span>停用
+                        </button>
+                      </li>
+                      <li v-else-if="identity.status === 'inactive'">
+                        <button class="dropdown-item text-green-500" @click="activateIdentity(identity)">
+                          <span class="i-carbon-play mr-2"></span>激活
+                        </button>
+                      </li>
+                      <li>
+                        <button class="dropdown-item text-red-500" @click="confirmDelete(identity)">
+                          <span class="i-carbon-trash-can mr-2"></span>删除
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DID信息 -->
+              <div class="did-info mb-4">
+                <p class="text-sm font-mono bg-darkbg/50 rounded p-2 text-textgray overflow-hidden text-ellipsis">
+                  {{ identity.did }}
+                </p>
+              </div>
+
+              <!-- 元数据和操作 -->
+              <div class="flex justify-between items-center">
+                <div class="created-at text-xs text-textgray">
+                  创建于 {{ formatDate(identity.createdAt) }}
+                </div>
+                <router-link :to="`/identity/${identity.id}`" class="btn-secondary text-sm py-1">
+                  详情
+                </router-link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 删除确认框 -->
-    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-      <div class="bg-primary p-6 rounded-lg shadow-xl w-full max-w-md" @click.stop>
-        <div class="flex justify-between items-center mb-6">
+    <!-- 绑定DID Modal -->
+    <div v-if="showBindModal" class="modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="modal-content bg-primary w-full max-w-md m-4 rounded-xl shadow-lg overflow-hidden" @click.stop>
+        <div class="modal-header p-6 border-b border-gray-700">
+          <h3 class="text-xl font-semibold text-textlight">绑定DID</h3>
+        </div>
+        <div class="modal-body p-6">
+          <form @submit.prevent="bindDid">
+            <div class="mb-4">
+              <label class="block text-textlight mb-2">DID标识符</label>
+              <input v-model="bindForm.did" type="text" placeholder="did:ethr:0x..." class="input w-full"
+                :class="{ 'border-red-500': bindFormErrors.did }">
+              <p v-if="bindFormErrors.did" class="text-red-500 text-xs mt-1">{{ bindFormErrors.did }}</p>
+            </div>
+            <div class="mb-6">
+              <label class="block text-textlight mb-2">别名</label>
+              <input v-model="bindForm.alias" type="text" placeholder="可选的身份名称" class="input w-full">
+            </div>
+            <div class="flex justify-end space-x-4">
+              <button type="button" class="btn-secondary" @click="closeBindModal">取消</button>
+              <button type="submit" class="btn-primary" :disabled="bindFormProcessing">
+                <span v-if="bindFormProcessing" class="i-carbon-circle-dash animate-spin mr-2"></span>
+                绑定
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div v-if="showDeleteConfirm"
+      class="modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="modal-content bg-primary w-full max-w-md m-4 rounded-xl shadow-lg overflow-hidden" @click.stop>
+        <div class="modal-header p-6 border-b border-gray-700">
           <h3 class="text-xl font-semibold text-textlight">确认删除</h3>
-          <button @click="showDeleteConfirm = false" class="text-metal hover:text-textlight">
-            <div class="i-carbon-close text-xl"></div>
-          </button>
         </div>
-
-        <p class="text-textgray mb-6">您确定要删除此身份吗？此操作无法撤销。</p>
-
-        <div class="text-xs font-mono bg-darkbg p-2 rounded mb-6 overflow-hidden text-textgray">
-          {{ identityToDelete?.did }}
-        </div>
-
-        <div class="flex justify-end space-x-3">
-          <button @click="showDeleteConfirm = false" class="btn-secondary">取消</button>
-          <button @click="deleteIdentity" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
-            :class="{ 'opacity-50 cursor-not-allowed': deleteLoading }" :disabled="deleteLoading">
-            <span v-if="deleteLoading" class="i-carbon-circle-dash animate-spin mr-2"></span>
-            删除
-          </button>
+        <div class="modal-body p-6">
+          <p class="text-textgray mb-6">您确定要删除身份 <span class="text-neon">{{ identityToDelete?.alias }}</span> 吗？此操作不可撤销。
+          </p>
+          <div class="flex justify-end space-x-4">
+            <button class="btn-secondary" @click="cancelDelete">取消</button>
+            <button class="btn-primary bg-red-500 hover:bg-red-600" @click="deleteIdentity">
+              <span v-if="deleteProcessing" class="i-carbon-circle-dash animate-spin mr-2"></span>
+              删除
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -132,113 +230,251 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useIdentityStore } from '@/stores/identity';
-  import type { Identity } from '@/types/identity';
-  import { logger } from '@/utils/logger';
+  import { useIdentityStore, type Identity } from '../../stores/identity';
+  import { logger } from '../../utils/logger';
 
+  // 初始化路由和存储
   const router = useRouter();
   const identityStore = useIdentityStore();
 
-  // 绑定表单
-  const showBindForm = ref(false);
-  const bindForm = ref({ did: '' });
-  const bindLoading = ref(false);
-  const bindError = ref('');
+  // 页面加载日志
+  onMounted(() => {
+    logger.info('Page:Identity', '身份管理页面已加载');
+    fetchIdentities();
+  });
 
-  // 删除确认
+  // 获取身份列表
+  const fetchIdentities = async () => {
+    await identityStore.fetchIdentities();
+  };
+
+  // 搜索和过滤设置
+  const searchQuery = ref('');
+  const statusFilter = ref('all');
+  const sortOrder = ref('newest');
+  const openDropdown = ref<string | null>(null);
+
+  // 绑定DID相关状态
+  const showBindModal = ref(false);
+  const bindForm = ref({
+    did: '',
+    alias: '',
+  });
+  const bindFormErrors = ref({
+    did: '',
+  });
+  const bindFormProcessing = ref(false);
+
+  // 删除身份相关状态
   const showDeleteConfirm = ref(false);
   const identityToDelete = ref<Identity | null>(null);
-  const deleteLoading = ref(false);
+  const deleteProcessing = ref(false);
 
-  // 格式化日期
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN');
+  // 过滤和排序后的身份列表
+  const filteredIdentities = computed(() => {
+    let result = [...identityStore.identities];
+
+    // 应用搜索过滤
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase();
+      result = result.filter(identity =>
+        identity.alias.toLowerCase().includes(query) ||
+        identity.did.toLowerCase().includes(query)
+      );
+    }
+
+    // 应用状态过滤
+    if (statusFilter.value !== 'all') {
+      result = result.filter(identity => identity.status === statusFilter.value);
+    }
+
+    // 应用排序
+    switch (sortOrder.value) {
+      case 'newest':
+        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case 'oldest':
+        result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case 'az':
+        result.sort((a, b) => a.alias.localeCompare(b.alias));
+        break;
+      case 'za':
+        result.sort((a, b) => b.alias.localeCompare(a.alias));
+        break;
+    }
+
+    return result;
+  });
+
+  // 页面点击事件 - 关闭打开的下拉菜单
+  watch(() => openDropdown.value, (newVal) => {
+    if (newVal) {
+      const closeDropdown = (e: MouseEvent) => {
+        openDropdown.value = null;
+        document.removeEventListener('click', closeDropdown);
+      };
+
+      setTimeout(() => {
+        document.addEventListener('click', closeDropdown);
+      }, 0);
+    }
+  });
+
+  // 切换下拉菜单
+  const toggleDropdown = (id: string) => {
+    if (openDropdown.value === id) {
+      openDropdown.value = null;
+    } else {
+      openDropdown.value = id;
+    }
   };
 
   // 导航到创建页面
   const navigateToCreate = () => {
-    logger.info('Component:IdentityList', '点击创建新身份按钮');
+    logger.info('Page:Identity', '导航到创建身份页面');
     router.push('/identity/create');
   };
-  
-  // 查看身份详情
-  const viewDetails = (id: string) => {
-    logger.info('Component:IdentityList', '查看身份详情', { id });
+
+  // 打开绑定DID模态框
+  const openBindModal = () => {
+    showBindModal.value = true;
+    bindForm.value = { did: '', alias: '' };
+    bindFormErrors.value = { did: '' };
   };
 
-  // 绑定身份
-  const bindIdentity = async () => {
-    bindError.value = '';
+  // 关闭绑定DID模态框
+  const closeBindModal = () => {
+    showBindModal.value = false;
+  };
 
+  // 绑定DID
+  const bindDid = async () => {
+    logger.info('Page:Identity', '绑定DID表单提交', { data: bindForm.value });
+
+    // 重置错误
+    bindFormErrors.value = { did: '' };
+
+    // 验证DID格式
     if (!bindForm.value.did) {
-      bindError.value = 'DID不能为空';
+      bindFormErrors.value.did = 'DID不能为空';
       return;
     }
 
     if (!bindForm.value.did.startsWith('did:')) {
-      bindError.value = 'DID必须以did:开头';
+      bindFormErrors.value.did = 'DID格式不正确，应以"did:"开头';
       return;
     }
 
-    bindLoading.value = true;
-    logger.info('Component:IdentityList', '开始绑定身份', { did: bindForm.value.did });
+    // 设置默认别名（如果用户未提供）
+    if (!bindForm.value.alias) {
+      bindForm.value.alias = `身份 ${identityStore.identities.length + 1}`;
+    }
+
+    // 处理绑定
+    bindFormProcessing.value = true;
 
     try {
-      await identityStore.bindIdentity(bindForm.value.did);
-      showBindForm.value = false;
-      bindForm.value.did = '';
-      logger.info('Component:IdentityList', '身份绑定成功');
-    } catch (err: any) {
-      bindError.value = err.message || '绑定失败，请稍后重试';
-      logger.error('Component:IdentityList', '身份绑定失败', { error: err.message });
+      await identityStore.bindIdentity(bindForm.value.did, bindForm.value.alias);
+      closeBindModal();
+    } catch (error: any) {
+      bindFormErrors.value.did = error.message || '绑定失败，请重试';
     } finally {
-      bindLoading.value = false;
+      bindFormProcessing.value = false;
+    }
+  };
+
+  // 设为默认身份
+  const setAsDefault = async (identity: Identity) => {
+    logger.info('Page:Identity', '设置默认身份', { id: identity.id });
+    openDropdown.value = null;
+
+    try {
+      await identityStore.setDefaultIdentity(identity.id);
+    } catch (error: any) {
+      // 错误处理
+      console.error('设置默认身份失败', error);
+    }
+  };
+
+  // 停用身份
+  const deactivateIdentity = async (identity: Identity) => {
+    logger.info('Page:Identity', '停用身份', { id: identity.id });
+    openDropdown.value = null;
+
+    try {
+      await identityStore.updateIdentity(identity.id, { status: 'inactive' });
+    } catch (error: any) {
+      // 错误处理
+      console.error('停用身份失败', error);
+    }
+  };
+
+  // 激活身份
+  const activateIdentity = async (identity: Identity) => {
+    logger.info('Page:Identity', '激活身份', { id: identity.id });
+    openDropdown.value = null;
+
+    try {
+      await identityStore.updateIdentity(identity.id, { status: 'active' });
+    } catch (error: any) {
+      // 错误处理
+      console.error('激活身份失败', error);
     }
   };
 
   // 确认删除
   const confirmDelete = (identity: Identity) => {
-    logger.info('Component:IdentityList', '打开删除确认框', { id: identity.id });
+    logger.info('Page:Identity', '打开删除确认框', { id: identity.id });
     identityToDelete.value = identity;
     showDeleteConfirm.value = true;
+    openDropdown.value = null;
   };
 
-  // 删除身份
+  // 取消删除
+  const cancelDelete = () => {
+    showDeleteConfirm.value = false;
+    identityToDelete.value = null;
+  };
+
+  // 执行删除
   const deleteIdentity = async () => {
     if (!identityToDelete.value) return;
 
-    deleteLoading.value = true;
-    logger.info('Component:IdentityList', '确认删除身份', { id: identityToDelete.value.id });
+    logger.info('Page:Identity', '执行删除身份', { id: identityToDelete.value.id });
+    deleteProcessing.value = true;
 
     try {
       await identityStore.deleteIdentity(identityToDelete.value.id);
       showDeleteConfirm.value = false;
       identityToDelete.value = null;
-      logger.info('Component:IdentityList', '身份删除成功');
-    } catch (err: any) {
-      // 错误已在store中处理
-      logger.error('Component:IdentityList', '身份删除失败', { error: err.message });
+    } catch (error: any) {
+      // 错误处理
+      console.error('删除身份失败', error);
     } finally {
-      deleteLoading.value = false;
+      deleteProcessing.value = false;
     }
   };
 
-  // 组件挂载时获取身份列表
-  onMounted(async () => {
-    logger.info('Page:Identity', '页面已加载');
-    if (identityStore.identities.length === 0) {
-      logger.info('API:Identity', '开始请求身份列表');
-      await identityStore.fetchIdentities();
-      logger.info('API:Identity', '身份列表请求完成');
-    }
-  });
+  // 格式化日期
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 </script>
 
 <style scoped>
-  .card {
-    @apply bg-primary/40 rounded-lg;
+  .dropdown-item {
+    @apply block w-full text-left px-3 py-2 text-textgray hover:bg-violet/20 hover:text-textlight rounded-md;
+  }
+
+  .modal-backdrop {
+    backdrop-filter: blur(4px);
   }
 </style>

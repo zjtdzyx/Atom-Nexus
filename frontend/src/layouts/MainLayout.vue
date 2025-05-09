@@ -42,7 +42,7 @@
             <h3 class="text-lg font-semibold text-textlight mb-4">产品</h3>
             <ul class="space-y-2">
               <li><router-link to="/identity" class="text-textgray hover:text-neon text-sm">身份管理</router-link></li>
-              <li><router-link to="/credentials" class="text-textgray hover:text-neon text-sm">凭证管理</router-link></li>
+              <li><router-link to="/credential" class="text-textgray hover:text-neon text-sm">凭证管理</router-link></li>
               <li><router-link to="/storage" class="text-textgray hover:text-neon text-sm">数据存储</router-link></li>
               <li><router-link to="/security" class="text-textgray hover:text-neon text-sm">安全与隐私</router-link></li>
             </ul>
