@@ -1,129 +1,107 @@
 <template>
   <div class="home-page">
     <!-- 主横幅 -->
-    <div class="hero-banner py-20 bg-gradient-to-b from-primary/80 to-primary">
-      <div class="container text-center">
-        <h1 class="text-4xl md:text-5xl font-bold text-textlight mb-6">
-          Atom Nexus
-        </h1>
-        <p class="text-xl md:text-2xl text-textgray max-w-2xl mx-auto mb-10">
-          身份自持，网络自由。管理您的数字身份与凭证
-        </p>
-        <div class="flex justify-center space-x-6">
-          <router-link to="/identity" class="btn-primary py-3 px-8">
-            <span class="i-carbon-earth-filled mr-2"></span>开始探索
-          </router-link>
-          <router-link to="/about" class="btn-secondary py-3 px-8">
-            <span class="i-carbon-information mr-2"></span>了解更多
-          </router-link>
+    <div class="hero-banner py-20 bg-gradient-to-b from-primary/80 to-primary relative overflow-hidden">
+      <!-- 背景装饰元素 -->
+      <div class="absolute top-1/4 right-0 w-1/3 h-1/3 bg-neon/5 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-10 w-1/4 h-1/4 bg-violet/5 rounded-full blur-3xl"></div>
+
+      <!-- 网络连接线 -->
+      <div class="network-line absolute top-1/3 right-0 w-1/3 opacity-20" style="transform: rotate(-15deg);"></div>
+      <div class="network-line absolute bottom-1/3 left-0 w-1/4 opacity-20" style="transform: rotate(10deg);"></div>
+
+      <div class="container">
+        <div class="flex flex-col lg:flex-row items-center">
+          <!-- 左侧文字内容 -->
+          <div class="w-full lg:w-3/5 text-left mb-10 lg:mb-0">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+              <div class="text-neon">Your Identity.</div>
+              <div class="text-violet">Your Network.</div>
+              <div class="text-textlight">Decentralized.</div>
+            </h1>
+            <p class="text-xl text-textgray max-w-2xl mb-10">
+              每个个体是一个独立原子，通过Nexus（枢纽）连接整个去中心化世界。
+              <br>身份自持，网络自由。
+            </p>
+            <div class="flex space-x-6">
+              <router-link to="/identity" class="btn-primary py-3 px-8">
+                开始使用
+              </router-link>
+              <router-link to="/about" class="btn-outline py-3 px-8">
+                了解更多
+              </router-link>
+            </div>
+          </div>
+
+          <!-- 右侧原子图形 -->
+          <div class="w-full lg:w-2/5 relative">
+            <div class="atom-illustration relative h-80 w-80 mx-auto">
+              <!-- 中心原子 -->
+              <div
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-neon opacity-70 blur-sm">
+              </div>
+              <div
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-neon opacity-80">
+              </div>
+
+              <!-- 轨道 -->
+              <div
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border border-violet/30 animate-spin-slow">
+              </div>
+              <div
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon/40 animate-spin-slow-reverse">
+              </div>
+
+              <!-- 粒子 -->
+              <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64">
+                <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-3 h-3 rounded-full bg-neon"></div>
+                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-3 h-3 rounded-full bg-neon"></div>
+                <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full bg-neon"></div>
+                <div class="absolute right-0 top-1/2 transform -translate-y-1/2 w-3 h-3 rounded-full bg-neon"></div>
+                <div class="absolute top-1/4 right-1/4 w-3 h-3 rounded-full bg-violet"></div>
+                <div class="absolute bottom-1/4 left-1/4 w-3 h-3 rounded-full bg-violet"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 简介部分 -->
-    <div class="features-section py-16 bg-primary/60">
+    <!-- 核心理念部分 -->
+    <div class="core-concepts-section py-16 bg-primary/60 text-center">
       <div class="container">
-        <h2 class="text-3xl font-bold text-textlight text-center mb-12">重新定义您的数字身份</h2>
+        <h2 class="text-4xl font-bold text-textlight mb-16">核心理念</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
           <div class="feature-card card p-6 flex flex-col items-center text-center">
-            <div class="feature-icon w-16 h-16 rounded-full bg-neon/20 flex items-center justify-center mb-4">
+            <div class="feature-icon w-16 h-16 rounded-full bg-neon/20 flex items-center justify-center mb-6">
               <span class="i-carbon-user-profile text-3xl text-neon"></span>
             </div>
-            <h3 class="text-xl font-semibold text-textlight mb-2">身份管理</h3>
-            <p class="text-textgray mb-4">创建和管理您的去中心化数字身份，保持完全的自主权</p>
-            <router-link to="/identity" class="mt-auto text-neon hover:underline">
-              管理身份
-            </router-link>
+            <h3 class="text-xl font-semibold text-textlight mb-3">身份管理</h3>
+            <p class="text-textgray">创建和管理您的去中心化数字身份，保持完全的自主权</p>
           </div>
 
           <div class="feature-card card p-6 flex flex-col items-center text-center">
-            <div class="feature-icon w-16 h-16 rounded-full bg-violet/20 flex items-center justify-center mb-4">
+            <div class="feature-icon w-16 h-16 rounded-full bg-violet/20 flex items-center justify-center mb-6">
               <span class="i-carbon-certificate text-3xl text-violet"></span>
             </div>
-            <h3 class="text-xl font-semibold text-textlight mb-2">凭证管理</h3>
-            <p class="text-textgray mb-4">安全地存储、分享和验证您的可验证凭证，掌控数据隐私</p>
-            <router-link to="/credential" class="mt-auto text-neon hover:underline">
-              管理凭证
-            </router-link>
+            <h3 class="text-xl font-semibold text-textlight mb-3">凭证管理</h3>
+            <p class="text-textgray">安全地存储、分享和验证您的可验证凭证，掌控数据隐私</p>
           </div>
 
           <div class="feature-card card p-6 flex flex-col items-center text-center">
-            <div class="feature-icon w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-              <span class="i-carbon-security text-3xl text-green-500"></span>
+            <div class="feature-icon w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-6">
+              <span class="i-carbon-security text-3xl text-blue-500"></span>
             </div>
-            <h3 class="text-xl font-semibold text-textlight mb-2">权限控制</h3>
-            <p class="text-textgray mb-4">精确控制谁可以访问您的数字身份和凭证，随时撤销权限</p>
-            <router-link to="/permission" class="mt-auto text-neon hover:underline">
-              管理权限
-            </router-link>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 使用场景部分 -->
-    <div class="use-cases-section py-16">
-      <div class="container">
-        <h2 class="text-3xl font-bold text-textlight text-center mb-4">使用场景</h2>
-        <p class="text-textgray text-center max-w-2xl mx-auto mb-12">Atom Nexus适用于各种需要安全、可靠身份验证的场景</p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div class="use-case-card bg-primary/40 rounded-lg overflow-hidden">
-            <div class="h-48 bg-gradient-to-r from-neon/30 to-violet/30 relative">
-              <div class="absolute inset-0 flex items-center justify-center">
-                <span class="i-carbon-campus text-6xl text-textlight"></span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-textlight mb-2">教育场景</h3>
-              <ul class="text-textgray space-y-2 mb-4">
-                <li class="flex items-start">
-                  <span class="i-carbon-checkmark text-neon mr-2 mt-1"></span>
-                  <span>学历证书和能力凭证的数字化管理</span>
-                </li>
-                <li class="flex items-start">
-                  <span class="i-carbon-checkmark text-neon mr-2 mt-1"></span>
-                  <span>多平台学习成果的统一认证与展示</span>
-                </li>
-                <li class="flex items-start">
-                  <span class="i-carbon-checkmark text-neon mr-2 mt-1"></span>
-                  <span>跨校区、跨机构的身份验证与授权</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="use-case-card bg-primary/40 rounded-lg overflow-hidden">
-            <div class="h-48 bg-gradient-to-r from-violet/30 to-neon/30 relative">
-              <div class="absolute inset-0 flex items-center justify-center">
-                <span class="i-carbon-enterprise text-6xl text-textlight"></span>
-              </div>
-            </div>
-            <div class="p-6">
-              <h3 class="text-xl font-semibold text-textlight mb-2">企业场景</h3>
-              <ul class="text-textgray space-y-2 mb-4">
-                <li class="flex items-start">
-                  <span class="i-carbon-checkmark text-neon mr-2 mt-1"></span>
-                  <span>员工身份与权限的安全管理</span>
-                </li>
-                <li class="flex items-start">
-                  <span class="i-carbon-checkmark text-neon mr-2 mt-1"></span>
-                  <span>跨部门、跨组织的身份互认与协作</span>
-                </li>
-                <li class="flex items-start">
-                  <span class="i-carbon-checkmark text-neon mr-2 mt-1"></span>
-                  <span>供应链上下游的身份验证与授权</span>
-                </li>
-              </ul>
-            </div>
+            <h3 class="text-xl font-semibold text-textlight mb-3">权限控制</h3>
+            <p class="text-textgray">精确控制谁可以访问您的数字身份和凭证，随时撤销权限</p>
           </div>
         </div>
       </div>
     </div>
 
     <!-- 技术栈部分 -->
-    <div class="tech-stack-section py-16 bg-primary/60">
+    <div class="tech-stack-section py-16">
       <div class="container">
         <h2 class="text-3xl font-bold text-textlight text-center mb-12">先进技术栈</h2>
 
@@ -191,6 +169,11 @@
 </script>
 
 <style scoped>
+  .hero-banner {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+  }
 
   .feature-card,
   .use-case-card,
@@ -204,5 +187,37 @@
     transform: translateY(-5px);
     box-shadow: 0 10px 25px -5px rgba(0, 224, 209, 0.1);
     background-color: rgba(30, 30, 47, 0.6);
+  }
+
+  .atom-illustration {
+    position: relative;
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+  }
+
+  @keyframes spin-slow-reverse {
+    from {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
+
+    to {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
+
+  .animate-spin-slow-reverse {
+    animation: spin-slow-reverse 15s linear infinite;
   }
 </style>

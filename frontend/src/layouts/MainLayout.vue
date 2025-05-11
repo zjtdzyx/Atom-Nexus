@@ -39,24 +39,6 @@
             <p class="text-textgray text-sm mb-4">
               重新定义数字身份和数据主权，为去中心化世界提供安全、自主的身份解决方案
             </p>
-            <div class="social-links flex space-x-3">
-              <a href="#"
-                class="w-8 h-8 rounded-full bg-primary/40 flex items-center justify-center text-neon hover:bg-neon/10 transition-all">
-                <div class="i-carbon-logo-github text-xl"></div>
-              </a>
-              <a href="#"
-                class="w-8 h-8 rounded-full bg-primary/40 flex items-center justify-center text-neon hover:bg-neon/10 transition-all">
-                <div class="i-carbon-logo-twitter text-xl"></div>
-              </a>
-              <a href="#"
-                class="w-8 h-8 rounded-full bg-primary/40 flex items-center justify-center text-neon hover:bg-neon/10 transition-all">
-                <div class="i-carbon-logo-discord text-xl"></div>
-              </a>
-              <a href="#"
-                class="w-8 h-8 rounded-full bg-primary/40 flex items-center justify-center text-neon hover:bg-neon/10 transition-all">
-                <div class="i-carbon-logo-linkedin text-xl"></div>
-              </a>
-            </div>
           </div>
 
           <!-- 链接 -->
@@ -65,8 +47,8 @@
             <ul class="space-y-2">
               <li><router-link to="/identity" class="text-textgray hover:text-neon text-sm">身份管理</router-link></li>
               <li><router-link to="/credential" class="text-textgray hover:text-neon text-sm">凭证管理</router-link></li>
-              <li><router-link to="/storage" class="text-textgray hover:text-neon text-sm">数据存储</router-link></li>
-              <li><router-link to="/permission" class="text-textgray hover:text-neon text-sm">权限管理</router-link></li>
+              <li><router-link to="/permission" class="text-textgray hover:text-neon text-sm">权限存储</router-link></li>
+              <li><router-link to="/apps" class="text-textgray hover:text-neon text-sm">应用集成</router-link></li>
             </ul>
           </div>
 

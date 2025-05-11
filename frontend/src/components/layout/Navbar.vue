@@ -24,8 +24,8 @@
 
       <!-- Auth Buttons -->
       <div class="hidden md:flex items-center space-x-4">
-        <button class="btn-secondary text-sm" @click="openLoginModal">登录</button>
-        <button class="btn-primary text-sm" @click="openRegisterModal">注册</button>
+        <button class="btn-connect text-sm px-4 py-1.5 rounded-full border border-neon/30 text-neon hover:bg-neon/10 transition-all" @click="openLoginModal">登录</button>
+        <button class="btn-register text-sm px-4 py-1.5 rounded-full bg-neon text-primary hover:bg-neon/90 transition-all" @click="openRegisterModal">注册</button>
       </div>
 
       <!-- Mobile Menu Button -->
@@ -49,8 +49,8 @@
           {{ item.title }}
         </router-link>
         <div class="flex flex-col space-y-3 pt-4">
-          <button class="btn-secondary" @click="openLoginModal">登录</button>
-          <button class="btn-primary" @click="openRegisterModal">注册</button>
+          <button class="btn-connect" @click="openLoginModal">登录</button>
+          <button class="btn-register" @click="openRegisterModal">注册</button>
         </div>
       </div>
     </div>
@@ -156,5 +156,13 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+  
+  .btn-connect {
+    @apply px-4 py-1.5 rounded-full border border-neon/30 text-neon hover:bg-neon/10 transition-all;
+  }
+  
+  .btn-register {
+    @apply px-4 py-1.5 rounded-full bg-neon text-primary hover:bg-neon/90 transition-all;
   }
 </style>

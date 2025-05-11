@@ -16,6 +16,11 @@
       <div class="network-line line-1"></div>
       <div class="network-line line-2"></div>
       <div class="network-line line-3"></div>
+      
+      <!-- 几何图形装饰 -->
+      <div class="geo-line geo-line-1"></div>
+      <div class="geo-line geo-line-2"></div>
+      <div class="geo-circle"></div>
     </div>
 
     <!-- 应用内容 -->
@@ -46,6 +51,7 @@
     width: 100%;
     height: 100%;
     font-family: 'Inter', sans-serif;
+    background-color: #050A1F; /* 深太空蓝 */
   }
 
   .app-container {
@@ -166,6 +172,39 @@
     width: 40%;
     transform: rotate(5deg);
     animation-delay: 4s;
+  }
+  
+  /* 几何装饰线 */
+  .geo-line {
+    position: fixed;
+    height: 1px;
+    background-color: rgba(138, 43, 226, 0.15);
+    transform-origin: left center;
+  }
+  
+  .geo-line-1 {
+    top: 25%;
+    left: 0;
+    width: 100%;
+    transform: rotate(-5deg);
+  }
+  
+  .geo-line-2 {
+    bottom: 35%;
+    left: 0;
+    width: 100%;
+    transform: rotate(3deg);
+  }
+  
+  .geo-circle {
+    position: fixed;
+    right: -200px;
+    bottom: -200px;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    border: 1px solid rgba(138, 43, 226, 0.1);
+    opacity: 0.3;
   }
 
   /* 页面过渡动画 */
