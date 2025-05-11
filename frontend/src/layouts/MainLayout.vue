@@ -19,7 +19,7 @@
 
     <!-- 主要内容 -->
     <main class="main-content pt-16">
-      <slot></slot>
+      <router-view></router-view>
     </main>
 
     <!-- 页脚 -->
@@ -36,9 +36,7 @@
               </div>
               <span class="text-xl font-bold gradient-text">Atom Nexus</span>
             </div>
-            <p class="text-textgray text-sm mb-4">
-              重新定义数字身份和数据主权，为去中心化世界提供安全、自主的身份解决方案
-            </p>
+
           </div>
 
           <!-- 链接 -->

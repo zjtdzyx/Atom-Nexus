@@ -144,9 +144,9 @@
     <!-- 行动召唤部分 -->
     <div class="cta-section py-20 bg-gradient-to-t from-primary/80 to-primary text-center">
       <div class="container">
-        <h2 class="text-3xl font-bold text-textlight mb-4">准备开始使用吗？</h2>
+        <h2 class="text-3xl font-bold text-textlight mb-4">掌握、连接、构建你的数字宇宙</h2>
         <p class="text-textgray max-w-2xl mx-auto mb-8">
-          加入Atom Nexus，开始掌控您的数字身份和数据，享受真正的数字自主权
+          Atom Nexus不只是帮你「登录」，而是帮你掌握、连接、构建自己的数字宇宙。加入我们，体验真正的去中心化身份网络。
         </p>
         <div class="flex justify-center">
           <router-link to="/identity/create" class="btn-primary py-3 px-8">
