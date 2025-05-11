@@ -14,99 +14,123 @@
 
     <div class="container py-6">
       <div class="max-w-3xl mx-auto">
-        <div class="card p-6 mb-8">
-          <h2 class="text-xl font-semibold text-textlight mb-4">验证可验证凭证</h2>
-          <p class="text-textgray mb-6">请上传、粘贴凭证JSON数据或输入凭证ID进行验证</p>
+        <div class="card-glow p-6 mb-8 relative overflow-hidden">
+          <!-- 背景装饰 -->
+          <div
+            class="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-br from-neon/5 to-transparent rounded-bl-full opacity-50">
+          </div>
+          <div class="absolute -bottom-10 -left-10 w-32 h-32 rounded-full border border-neon/10"></div>
 
-          <!-- 验证方式选择 -->
-          <div class="mb-6">
-            <div class="flex space-x-4 bg-darkbg rounded-lg p-1 mb-6">
-              <button @click="verifyMethod = 'upload'" class="flex-1 py-2 rounded-md text-center transition-colors"
-                :class="verifyMethod === 'upload' ? 'bg-primary text-textlight' : 'text-textgray hover:text-textlight'">
-                <span class="i-carbon-document-add mr-1"></span>上传凭证
-              </button>
-              <button @click="verifyMethod = 'paste'" class="flex-1 py-2 rounded-md text-center transition-colors"
-                :class="verifyMethod === 'paste' ? 'bg-primary text-textlight' : 'text-textgray hover:text-textlight'">
-                <span class="i-carbon-paste mr-1"></span>粘贴JSON
-              </button>
-              <button @click="verifyMethod = 'id'" class="flex-1 py-2 rounded-md text-center transition-colors"
-                :class="verifyMethod === 'id' ? 'bg-primary text-textlight' : 'text-textgray hover:text-textlight'">
-                <span class="i-carbon-search mr-1"></span>输入ID
-              </button>
-              <button @click="verifyMethod = 'qrcode'" class="flex-1 py-2 rounded-md text-center transition-colors"
-                :class="verifyMethod === 'qrcode' ? 'bg-primary text-textlight' : 'text-textgray hover:text-textlight'">
-                <span class="i-carbon-qr-code mr-1"></span>扫码验证
-              </button>
-            </div>
+          <!-- 内容 -->
+          <div class="relative">
+            <h2 class="text-xl font-semibold text-textlight mb-2 flex items-center">
+              <span class="i-carbon-certificate-check text-neon mr-2"></span>验证可验证凭证
+            </h2>
+            <p class="text-textgray mb-6 pl-7">请上传、粘贴凭证JSON数据或输入凭证ID进行验证</p>
 
-            <!-- 文件上传区域 -->
-            <div v-if="verifyMethod === 'upload'" class="verify-upload">
-              <div
-                class="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center cursor-pointer hover:border-neon/50 transition-colors"
-                @click="triggerFileUpload" @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false"
-                @drop.prevent="onFileDrop" :class="{ 'border-neon bg-neon/10': dragOver }">
-                <input ref="fileInput" type="file" class="hidden" accept="application/json" @change="onFileSelected" />
-                <div v-if="!selectedFile" class="py-8">
-                  <span class="i-carbon-document-add text-5xl text-textgray mb-4 block mx-auto"></span>
-                  <p class="text-textlight mb-2">拖放凭证文件到此处或点击上传</p>
-                  <p class="text-textgray text-sm">支持JSON格式的凭证文件</p>
+            <!-- 验证方式选择 -->
+            <div class="mb-6">
+              <div class="flex space-x-4 bg-darkbg/50 backdrop-blur-sm rounded-full p-1 mb-8 border border-neon/10">
+                <button @click="verifyMethod = 'upload'"
+                  class="flex-1 py-2 rounded-full text-center transition-all duration-300 flex items-center justify-center"
+                  :class="verifyMethod === 'upload' ? 'bg-gradient-to-r from-neon/80 to-violet/80 text-black shadow-neon' : 'text-textgray hover:text-textlight hover:bg-primary/50'">
+                  <span class="i-carbon-document-add mr-1"></span>上传凭证
+                </button>
+                <button @click="verifyMethod = 'paste'"
+                  class="flex-1 py-2 rounded-full text-center transition-all duration-300 flex items-center justify-center"
+                  :class="verifyMethod === 'paste' ? 'bg-gradient-to-r from-neon/80 to-violet/80 text-black shadow-neon' : 'text-textgray hover:text-textlight hover:bg-primary/50'">
+                  <span class="i-carbon-paste mr-1"></span>粘贴JSON
+                </button>
+                <button @click="verifyMethod = 'id'"
+                  class="flex-1 py-2 rounded-full text-center transition-all duration-300 flex items-center justify-center"
+                  :class="verifyMethod === 'id' ? 'bg-gradient-to-r from-neon/80 to-violet/80 text-black shadow-neon' : 'text-textgray hover:text-textlight hover:bg-primary/50'">
+                  <span class="i-carbon-search mr-1"></span>输入ID
+                </button>
+                <button @click="verifyMethod = 'qrcode'"
+                  class="flex-1 py-2 rounded-full text-center transition-all duration-300 flex items-center justify-center"
+                  :class="verifyMethod === 'qrcode' ? 'bg-gradient-to-r from-neon/80 to-violet/80 text-black shadow-neon' : 'text-textgray hover:text-textlight hover:bg-primary/50'">
+                  <span class="i-carbon-qr-code mr-1"></span>扫码验证
+                </button>
+              </div>
+
+              <!-- 文件上传区域 -->
+              <div v-if="verifyMethod === 'upload'" class="verify-upload">
+                <div class="upload-area" @click="triggerFileUpload" @dragover.prevent="dragOver = true"
+                  @dragleave.prevent="dragOver = false" @drop.prevent="onFileDrop"
+                  :class="{ 'border-neon bg-neon/5 shadow-neon': dragOver }">
+                  <input ref="fileInput" type="file" class="hidden" accept="application/json"
+                    @change="onFileSelected" />
+                  <div v-if="!selectedFile" class="py-10">
+                    <div class="upload-icon-container">
+                      <span class="upload-icon i-carbon-document-add text-6xl"></span>
+                      <div class="upload-ring"></div>
+                    </div>
+                    <p class="text-textlight mb-2 mt-6">拖放凭证文件到此处或点击上传</p>
+                    <p class="text-textgray text-sm">支持JSON格式的凭证文件</p>
+                  </div>
+                  <div v-else class="py-4">
+                    <div class="flex flex-col items-center">
+                      <div class="verified-icon-container">
+                        <span class="i-carbon-checkmark text-3xl text-neon"></span>
+                      </div>
+                      <p class="text-textlight my-3 font-medium">{{ selectedFile.name }}</p>
+                      <p class="text-textgray text-sm mb-4">{{ formatFileSize(selectedFile.size) }}</p>
+                      <button class="btn-outline text-sm py-1.5 px-4" @click.stop="selectedFile = null">
+                        <span class="i-carbon-close mr-1"></span>移除
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div v-else class="py-4">
-                  <span class="i-carbon-document-verified text-4xl text-neon mb-3 block mx-auto"></span>
-                  <p class="text-textlight mb-1">{{ selectedFile.name }}</p>
-                  <p class="text-textgray text-sm mb-3">{{ formatFileSize(selectedFile.size) }}</p>
-                  <button class="btn-secondary text-sm py-1" @click.stop="selectedFile = null">
-                    <span class="i-carbon-close mr-1"></span>移除
+                <div class="mt-8 flex justify-center">
+                  <button class="verify-button" :disabled="!selectedFile || isVerifying" @click="verifyUploadedFile">
+                    <span v-if="isVerifying" class="i-carbon-circle-dash animate-spin mr-2"></span>
+                    <span class="i-carbon-certificate-check mr-2"></span>
+                    验证凭证
                   </button>
                 </div>
               </div>
-              <div class="mt-6 flex justify-center">
-                <button class="btn-primary py-2 px-8" :disabled="!selectedFile || isVerifying"
-                  @click="verifyUploadedFile">
-                  <span v-if="isVerifying" class="i-carbon-circle-dash animate-spin mr-2"></span>
-                  验证凭证
-                </button>
-              </div>
-            </div>
 
-            <!-- JSON粘贴区域 -->
-            <div v-if="verifyMethod === 'paste'" class="verify-paste">
-              <div class="mb-4">
-                <textarea v-model="credentialJson" rows="10" placeholder="在此粘贴凭证JSON数据..."
-                  class="input w-full font-mono text-sm"></textarea>
+              <!-- JSON粘贴区域 -->
+              <div v-if="verifyMethod === 'paste'" class="verify-paste">
+                <div class="mb-6">
+                  <textarea v-model="credentialJson" rows="10" placeholder="在此粘贴凭证JSON数据..."
+                    class="verify-input font-mono text-sm"></textarea>
+                </div>
+                <div class="flex justify-center">
+                  <button class="verify-button" :disabled="!credentialJson || isVerifying" @click="verifyPastedJson">
+                    <span v-if="isVerifying" class="i-carbon-circle-dash animate-spin mr-2"></span>
+                    <span class="i-carbon-certificate-check mr-2"></span>
+                    验证凭证
+                  </button>
+                </div>
               </div>
-              <div class="flex justify-center">
-                <button class="btn-primary py-2 px-8" :disabled="!credentialJson || isVerifying"
-                  @click="verifyPastedJson">
-                  <span v-if="isVerifying" class="i-carbon-circle-dash animate-spin mr-2"></span>
-                  验证凭证
-                </button>
-              </div>
-            </div>
 
-            <!-- ID输入区域 -->
-            <div v-if="verifyMethod === 'id'" class="verify-id">
-              <div class="mb-4">
-                <label class="block text-textlight mb-2">凭证ID</label>
-                <input v-model="credentialId" type="text" placeholder="输入凭证ID..." class="input w-full">
-                <p class="text-xs text-textgray mt-1">输入您想要验证的凭证ID</p>
+              <!-- ID输入区域 -->
+              <div v-if="verifyMethod === 'id'" class="verify-id">
+                <div class="mb-6">
+                  <label class="block text-textlight mb-2 flex items-center">
+                    <span class="i-carbon-id mr-2 text-neon"></span>凭证ID
+                  </label>
+                  <input v-model="credentialId" type="text" placeholder="输入凭证ID..." class="verify-input">
+                  <p class="text-xs text-textgray mt-1 ml-6">输入您想要验证的凭证唯一标识符</p>
+                </div>
+                <div class="flex justify-center">
+                  <button class="verify-button" :disabled="!credentialId || isVerifying" @click="verifyCredentialById">
+                    <span v-if="isVerifying" class="i-carbon-circle-dash animate-spin mr-2"></span>
+                    <span class="i-carbon-certificate-check mr-2"></span>
+                    验证凭证
+                  </button>
+                </div>
               </div>
-              <div class="flex justify-center">
-                <button class="btn-primary py-2 px-8" :disabled="!credentialId || isVerifying"
-                  @click="verifyCredentialById">
-                  <span v-if="isVerifying" class="i-carbon-circle-dash animate-spin mr-2"></span>
-                  验证凭证
-                </button>
+
+              <!-- 二维码扫描区域 -->
+              <div v-if="verifyMethod === 'qrcode'" class="verify-qrcode">
+                <VerifyQrCode @code-detected="handleQrCodeDetected" />
               </div>
-            </div>
 
-            <!-- 二维码扫描区域 -->
-            <div v-if="verifyMethod === 'qrcode'" class="verify-qrcode">
-              <VerifyQrCode @code-detected="handleQrCodeDetected" />
+              <!-- 高级验证选项 -->
+              <VerifyOptions v-if="verifyMethod !== 'qrcode'" v-model:options="verifyOptions" class="mt-8" />
             </div>
-
-            <!-- 高级验证选项 -->
-            <VerifyOptions v-if="verifyMethod !== 'qrcode'" v-model:options="verifyOptions" class="mt-6" />
           </div>
         </div>
 
@@ -117,82 +141,109 @@
             :errors="verifyResult.errors || []" @view-details="viewFullCredential" @verify-again="resetVerification"
             @use-credential="useCredential" @show-errors="showErrors" />
 
-          <div class="mt-6">
-            <div class="bg-darkbg/30 rounded-lg p-4 mb-6">
-              <h4 class="text-sm font-medium text-textlight mb-3">详细检查结果</h4>
-              <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                  <div>
-                    <span class="text-textlight">格式检查</span>
-                    <p class="text-xs text-textgray">验证凭证格式是否符合标准</p>
+          <div class="mt-8">
+            <div class="card-atom p-6 mb-6">
+              <h4 class="text-sm font-medium text-textlight mb-4 flex items-center">
+                <span class="i-carbon-list-checked text-neon mr-2"></span>详细检查结果
+              </h4>
+              <div class="space-y-4">
+                <div class="check-item" :class="verifyResult.checks.format ? 'check-success' : 'check-failed'">
+                  <div class="check-icon">
+                    <span :class="verifyResult.checks.format ? 'i-carbon-checkmark' : 'i-carbon-close'"></span>
                   </div>
-                  <span :class="verifyResult.checks.format ? 'text-green-500' : 'text-red-500'" class="font-medium">
+                  <div class="check-content">
+                    <div class="check-title">格式检查</div>
+                    <div class="check-desc">验证凭证格式是否符合标准</div>
+                  </div>
+                  <div class="check-status">
                     {{ verifyResult.checks.format ? '通过' : '失败' }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <div>
-                    <span class="text-textlight">签名检查</span>
-                    <p class="text-xs text-textgray">验证发行者签名是否有效</p>
                   </div>
-                  <span :class="verifyResult.checks.signature ? 'text-green-500' : 'text-red-500'" class="font-medium">
+                </div>
+
+                <div class="check-item" :class="verifyResult.checks.signature ? 'check-success' : 'check-failed'">
+                  <div class="check-icon">
+                    <span :class="verifyResult.checks.signature ? 'i-carbon-checkmark' : 'i-carbon-close'"></span>
+                  </div>
+                  <div class="check-content">
+                    <div class="check-title">签名检查</div>
+                    <div class="check-desc">验证发行者签名是否有效</div>
+                  </div>
+                  <div class="check-status">
                     {{ verifyResult.checks.signature ? '通过' : '失败' }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <div>
-                    <span class="text-textlight">过期检查</span>
-                    <p class="text-xs text-textgray">验证凭证是否已过期</p>
                   </div>
-                  <span :class="!verifyResult.checks.expired ? 'text-green-500' : 'text-red-500'" class="font-medium">
+                </div>
+
+                <div class="check-item" :class="!verifyResult.checks.expired ? 'check-success' : 'check-warning'">
+                  <div class="check-icon">
+                    <span :class="!verifyResult.checks.expired ? 'i-carbon-checkmark' : 'i-carbon-warning'"></span>
+                  </div>
+                  <div class="check-content">
+                    <div class="check-title">过期检查</div>
+                    <div class="check-desc">验证凭证是否已过期</div>
+                  </div>
+                  <div class="check-status">
                     {{ !verifyResult.checks.expired ? '通过' : '已过期' }}
-                  </span>
-                </div>
-                <div class="flex justify-between items-center">
-                  <div>
-                    <span class="text-textlight">吊销检查</span>
-                    <p class="text-xs text-textgray">验证凭证是否已被撤销</p>
                   </div>
-                  <span :class="!verifyResult.checks.revoked ? 'text-green-500' : 'text-red-500'" class="font-medium">
+                </div>
+
+                <div class="check-item" :class="!verifyResult.checks.revoked ? 'check-success' : 'check-failed'">
+                  <div class="check-icon">
+                    <span :class="!verifyResult.checks.revoked ? 'i-carbon-checkmark' : 'i-carbon-close'"></span>
+                  </div>
+                  <div class="check-content">
+                    <div class="check-title">吊销检查</div>
+                    <div class="check-desc">验证凭证是否已被撤销</div>
+                  </div>
+                  <div class="check-status">
                     {{ !verifyResult.checks.revoked ? '通过' : '已撤销' }}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- 操作按钮 -->
-            <div class="flex justify-center space-x-4">
-              <button class="btn-secondary py-2 px-6" @click="resetVerification">
-                <span class="i-carbon-reset mr-1"></span>重新验证
+            <div class="flex justify-center space-x-6">
+              <button class="btn-outline py-2 px-6 flex items-center" @click="resetVerification">
+                <span class="i-carbon-reset mr-2"></span>重新验证
               </button>
-              <button v-if="verifyResult.isValid" class="btn-primary py-2 px-6" @click="exportVerifiedCredential">
-                <span class="i-carbon-export mr-1"></span>导出凭证
+              <button v-if="verifyResult.isValid" class="btn-primary py-2 px-6 flex items-center"
+                @click="exportVerifiedCredential">
+                <span class="i-carbon-export mr-2"></span>导出凭证
               </button>
             </div>
           </div>
         </div>
 
         <!-- 验证最佳实践提示 -->
-        <div v-if="!verifyResult" class="mt-8 bg-primary/40 rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-textlight mb-3">验证最佳实践</h3>
-          <ul class="space-y-2 text-textgray">
-            <li class="flex items-start">
-              <span class="i-carbon-checkmark-filled text-neon mt-1 mr-2"></span>
-              <span>确保您从可信来源获取凭证，验证发行者的DID是否可信</span>
-            </li>
-            <li class="flex items-start">
-              <span class="i-carbon-checkmark-filled text-neon mt-1 mr-2"></span>
-              <span>检查凭证是否过期或被撤销，尤其是重要的身份或资格凭证</span>
-            </li>
-            <li class="flex items-start">
-              <span class="i-carbon-checkmark-filled text-neon mt-1 mr-2"></span>
-              <span>验证后妥善保存验证结果，必要时保留验证记录</span>
-            </li>
-            <li class="flex items-start">
-              <span class="i-carbon-checkmark-filled text-neon mt-1 mr-2"></span>
-              <span>对于高敏感度凭证，建议通过多种方式交叉验证其真实性</span>
-            </li>
-          </ul>
+        <div v-if="!verifyResult" class="mt-8 card-atom p-6 relative overflow-hidden">
+          <!-- 背景装饰 -->
+          <div class="absolute -top-8 -right-8 w-24 h-24 rounded-full border border-neon/10 opacity-40"></div>
+          <div class="absolute bottom-0 left-0 w-1/2 h-1/3 bg-gradient-to-tr from-violet/5 to-transparent"></div>
+
+          <!-- 内容 -->
+          <div class="relative">
+            <h3 class="text-lg font-semibold text-textlight mb-5 flex items-center">
+              <span class="i-carbon-idea text-neon mr-2"></span>验证最佳实践
+            </h3>
+            <ul class="space-y-4 text-textgray">
+              <li class="best-practice-item">
+                <span class="i-carbon-checkmark-filled text-neon mr-3"></span>
+                <span>确保您从可信来源获取凭证，验证发行者的DID是否可信</span>
+              </li>
+              <li class="best-practice-item">
+                <span class="i-carbon-checkmark-filled text-neon mr-3"></span>
+                <span>检查凭证是否过期或被撤销，尤其是重要的身份或资格凭证</span>
+              </li>
+              <li class="best-practice-item">
+                <span class="i-carbon-checkmark-filled text-neon mr-3"></span>
+                <span>验证后妥善保存验证结果，必要时保留验证记录</span>
+              </li>
+              <li class="best-practice-item">
+                <span class="i-carbon-checkmark-filled text-neon mr-3"></span>
+                <span>对于高敏感度凭证，建议通过多种方式交叉验证其真实性</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -201,19 +252,23 @@
     <div v-if="showFullCredentialModal"
       class="modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="modal-content bg-primary w-full max-w-3xl m-4 rounded-xl shadow-lg overflow-hidden" @click.stop>
-        <div class="modal-header p-6 border-b border-gray-700 flex justify-between items-center">
-          <h3 class="text-xl font-semibold text-textlight">完整凭证数据</h3>
-          <button @click="showFullCredentialModal = false" class="text-textgray hover:text-neon">
-            <span class="i-carbon-close"></span>
+        <div class="modal-header p-6 border-b border-neon/10 flex justify-between items-center">
+          <h3 class="text-xl font-semibold text-textlight flex items-center">
+            <span class="i-carbon-document text-neon mr-2"></span>完整凭证数据
+          </h3>
+          <button @click="showFullCredentialModal = false" class="text-textgray hover:text-neon transition-colors">
+            <span class="i-carbon-close text-xl"></span>
           </button>
         </div>
         <div class="modal-body p-6">
-          <div class="bg-darkbg/50 p-4 rounded-lg overflow-auto max-h-[70vh]">
+          <div class="bg-darkbg/70 p-4 rounded-lg overflow-auto max-h-[70vh] border border-neon/10">
             <pre
               class="text-textlight font-mono text-sm whitespace-pre-wrap">{{ JSON.stringify(verifiedCredential, null, 2) }}</pre>
           </div>
           <div class="mt-6 flex justify-end">
-            <button class="btn-secondary" @click="showFullCredentialModal = false">关闭</button>
+            <button class="btn-outline py-2 px-6 flex items-center" @click="showFullCredentialModal = false">
+              <span class="i-carbon-close mr-2"></span>关闭
+            </button>
           </div>
         </div>
       </div>
@@ -222,45 +277,55 @@
     <!-- 错误详情模态框 -->
     <div v-if="showErrorsModal" class="modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div class="modal-content bg-primary w-full max-w-xl m-4 rounded-xl shadow-lg overflow-hidden" @click.stop>
-        <div class="modal-header p-6 border-b border-gray-700 flex justify-between items-center">
-          <h3 class="text-xl font-semibold text-textlight">验证错误详情</h3>
-          <button @click="showErrorsModal = false" class="text-textgray hover:text-neon">
-            <span class="i-carbon-close"></span>
+        <div class="modal-header p-6 border-b border-neon/10 flex justify-between items-center">
+          <h3 class="text-xl font-semibold text-textlight flex items-center">
+            <span class="i-carbon-warning-alt text-red-500 mr-2"></span>验证错误详情
+          </h3>
+          <button @click="showErrorsModal = false" class="text-textgray hover:text-neon transition-colors">
+            <span class="i-carbon-close text-xl"></span>
           </button>
         </div>
         <div class="modal-body p-6">
-          <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-            <span class="i-carbon-warning-filled text-red-500 text-2xl block mx-auto mb-2"></span>
-            <h4 class="text-center text-red-500 font-medium mb-4">验证失败</h4>
-            <ul class="space-y-2">
-              <li v-for="(error, index) in verifyResult?.errors" :key="index" class="text-textlight text-sm">
-                <span class="i-carbon-close-filled text-red-500 mr-2"></span>{{ error }}
+          <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-6 mb-6">
+            <div class="error-icon-container">
+              <span class="i-carbon-warning text-3xl text-red-500"></span>
+            </div>
+            <h4 class="text-center text-red-500 font-medium my-4">验证失败</h4>
+            <ul class="space-y-3">
+              <li v-for="(error, index) in verifyResult?.errors" :key="index"
+                class="text-textlight text-sm flex items-start">
+                <span class="i-carbon-close-filled text-red-500 mt-1 mr-3 flex-shrink-0"></span>
+                <span>{{ error }}</span>
               </li>
             </ul>
           </div>
-          <p class="text-textgray text-sm mb-4">
-            以下是一些可能导致验证失败的常见原因：
-          </p>
-          <ul class="text-textgray text-sm space-y-2 mb-6">
-            <li class="flex items-start">
-              <span class="i-carbon-dot-mark mr-2 mt-1"></span>
-              <span>凭证签名不匹配或已被篡改</span>
-            </li>
-            <li class="flex items-start">
-              <span class="i-carbon-dot-mark mr-2 mt-1"></span>
-              <span>发行者DID无法解析或不被信任</span>
-            </li>
-            <li class="flex items-start">
-              <span class="i-carbon-dot-mark mr-2 mt-1"></span>
-              <span>凭证已过期或已被撤销</span>
-            </li>
-            <li class="flex items-start">
-              <span class="i-carbon-dot-mark mr-2 mt-1"></span>
-              <span>凭证格式无效或不符合标准规范</span>
-            </li>
-          </ul>
-          <div class="flex justify-end">
-            <button class="btn-secondary" @click="showErrorsModal = false">关闭</button>
+          <div class="bg-darkbg/50 rounded-lg border border-neon/5 p-5">
+            <p class="text-textgray text-sm mb-4">
+              以下是一些可能导致验证失败的常见原因：
+            </p>
+            <ul class="text-textgray text-sm space-y-3 mb-1">
+              <li class="flex items-start">
+                <span class="i-carbon-dot-mark text-neon mr-3 mt-1"></span>
+                <span>凭证签名不匹配或已被篡改</span>
+              </li>
+              <li class="flex items-start">
+                <span class="i-carbon-dot-mark text-neon mr-3 mt-1"></span>
+                <span>发行者DID无法解析或不被信任</span>
+              </li>
+              <li class="flex items-start">
+                <span class="i-carbon-dot-mark text-neon mr-3 mt-1"></span>
+                <span>凭证已过期或已被撤销</span>
+              </li>
+              <li class="flex items-start">
+                <span class="i-carbon-dot-mark text-neon mr-3 mt-1"></span>
+                <span>凭证格式无效或不符合标准规范</span>
+              </li>
+            </ul>
+          </div>
+          <div class="flex justify-end mt-6">
+            <button class="btn-outline py-2 px-6 flex items-center" @click="showErrorsModal = false">
+              <span class="i-carbon-close mr-2"></span>关闭
+            </button>
           </div>
         </div>
       </div>
@@ -542,19 +607,112 @@
 </script>
 
 <style scoped>
-  .input {
-    @apply w-full px-4 py-2 bg-darkbg/50 border border-gray-700 rounded-lg text-textlight focus:outline-none focus:ring-2 focus:ring-neon/50;
+  .card-glow {
+    @apply bg-primary/80 backdrop-blur-sm border border-neon/10 rounded-xl shadow-md transition-all duration-300;
+  }
+
+  .verify-input {
+    @apply w-full px-5 py-3 bg-darkbg/50 border border-neon/20 rounded-full text-textlight focus:outline-none focus:border-neon focus:shadow-neon transition-all;
+  }
+
+  .verify-button {
+    @apply py-3 px-8 bg-gradient-to-r from-neon to-violet text-black font-medium rounded-full flex items-center justify-center shadow-md hover:shadow-neon transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .upload-area {
+    @apply border-2 border-dashed border-neon/20 rounded-xl p-6 text-center cursor-pointer hover:border-neon/40 hover:bg-neon/5 transition-all duration-300 backdrop-blur-sm;
+  }
+
+  .upload-icon-container {
+    @apply relative w-20 h-20 mx-auto;
+  }
+
+  .upload-icon {
+    @apply absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-neon/70;
+  }
+
+  .upload-ring {
+    @apply absolute inset-0 rounded-full border-2 border-neon/20 animate-pulse-slow;
+  }
+
+  .verified-icon-container {
+    @apply relative w-12 h-12 flex items-center justify-center rounded-full bg-neon/20 border border-neon/40 shadow-neon;
+  }
+
+  .error-icon-container {
+    @apply w-16 h-16 mx-auto rounded-full bg-red-500/20 flex items-center justify-center border border-red-500/30;
   }
 
   .modal-backdrop {
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
   }
 
-  .btn-primary {
-    @apply bg-neon text-black font-medium rounded-lg hover:bg-neon/90 transition-colors;
+  .check-item {
+    @apply flex items-center p-3 rounded-lg transition-all;
   }
 
-  .btn-secondary {
-    @apply bg-darkbg border border-gray-700 text-textlight font-medium rounded-lg hover:bg-primary/80 transition-colors;
+  .check-icon {
+    @apply w-10 h-10 flex items-center justify-center rounded-full mr-4 flex-shrink-0;
+  }
+
+  .check-content {
+    @apply flex-grow;
+  }
+
+  .check-title {
+    @apply text-textlight font-medium;
+  }
+
+  .check-desc {
+    @apply text-xs text-textgray;
+  }
+
+  .check-status {
+    @apply text-sm font-medium ml-2 flex-shrink-0;
+  }
+
+  .check-success {
+    @apply bg-neon/5 hover:bg-neon/10;
+  }
+
+  .check-success .check-icon {
+    @apply bg-neon/20 text-neon;
+  }
+
+  .check-success .check-status {
+    @apply text-neon;
+  }
+
+  .check-failed {
+    @apply bg-red-500/5 hover:bg-red-500/10;
+  }
+
+  .check-failed .check-icon {
+    @apply bg-red-500/20 text-red-500;
+  }
+
+  .check-failed .check-status {
+    @apply text-red-500;
+  }
+
+  .check-warning {
+    @apply bg-amber-500/5 hover:bg-amber-500/10;
+  }
+
+  .check-warning .check-icon {
+    @apply bg-amber-500/20 text-amber-500;
+  }
+
+  .check-warning .check-status {
+    @apply text-amber-500;
+  }
+
+  .best-practice-item {
+    @apply flex items-start p-2 rounded-lg hover:bg-neon/5 transition-all;
+  }
+
+  textarea.verify-input {
+    @apply rounded-xl;
+    min-height: 200px;
   }
 </style>

@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+请严格遵循 Atom Nexus 项目的后端（NestJS）开发规范：
+
+- 后端：Node.js + NestJS
+- 数据存储：PostgreSQL、Redis、IPFS/Ceramic
+- 身份协议：W3C DID、VC 标准
+- 
+【模块结构规范】
+- 每个模块放在 `src/modules/<模块名>/` 目录下
+- 模块内结构必须如下：
+  - `controller/`：放置控制器（RESTful API 层）
+  - `service/`：放置业务逻辑处理层
+  - `dto/`：放置数据传输对象（Request 和 Response 验证）
+  - `entity/`：放置数据库实体定义
+  - `repository/`（可选）：封装复杂的数据库查询逻辑
+  - `module.ts`：NestJS 模块定义
+- 全局公共逻辑放在：
+  - `src/common/`（如：异常过滤器、守卫、拦截器、统一响应格式）
+  - `src/shared/`（如：共用的数据库操作、通用的第三方 SDK、工具函数）
+
+【接口规范】
+- 所有接口必须遵循 RESTful 设计：
+  - GET：查询
+  - POST：新增
+  - PUT：修改
+  - DELETE：删除
+- 接口路径规范：`/api/<模块名>/<资源名>`
+- 所有接口必须使用 `@ApiOperation` 和 `@ApiResponse` 装饰器，保持 Swagger 文档同步更新
+- 所有入参必须通过 DTO 验证，禁止直接使用 `any` 或 `body: any`
+
+【数据库规范】
+- 所有数据模型使用 TypeORM 实体定义在 `entity/` 目录
+- 禁止在 Service 层直接写 SQL，复杂查询统一通过 `repository/` 处理
+- 表命名统一使用小写下划线风格，如 `user_profile`
+
+【自动化要求】
+- 每次新建模块时，必须同步创建：
+  - `controller/` + `service/` + `dto/` + `entity/` + `module.ts`
+- 必须自动更新 `src/modules/index.ts` 作为模块统一出口
+- 必须自动同步 Swagger 接口文档（通过装饰器）
+- 请自动删除或移除不符合上述结构规范的旧文件
+
+【文件移除规则】
+- 如果发现任何逻辑写在 `src/` 根目录（如 `src/user.service.ts`），请自动删除或提示开发者移动到 `modules/`
+- 禁止在 Controller 内直接写数据库逻辑，必须调用 Service 层
+
+【统一响应规范】
+- 所有接口返回统一格式：
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {}
+
+}
