@@ -50,15 +50,6 @@ http.interceptors.response.use(
       }
     );
 
-    // 如果是标准响应格式，检查code
-    if (response.data && typeof response.data.code !== 'undefined') {
-      // 如果业务状态码不为0，说明有业务错误
-      if (response.data.code !== 0) {
-        const error = new Error(response.data.message || '未知错误');
-        return Promise.reject(error);
-      }
-    }
-
     return response.data;
   },
   (error) => {
@@ -76,18 +67,23 @@ http.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // 未授权，可能需要重新登录
+          logger.warn('API:Response', '用户未授权，需要重新登录');
           window.location.href = '/auth/login';
           break;
         case 403:
           // 权限不足
+          logger.warn('API:Response', '权限不足，无法访问资源');
           break;
         case 404:
           // 资源不存在
+          logger.warn('API:Response', '请求的资源不存在');
           break;
         case 500:
           // 服务器错误
+          logger.error('API:Response', '服务器内部错误');
           break;
         default:
+          logger.warn('API:Response', `未处理的HTTP错误状态码: ${error.response.status}`);
           break;
       }
 
@@ -95,10 +91,43 @@ http.interceptors.response.use(
       if (error.response.data && error.response.data.message) {
         error.message = error.response.data.message;
       }
+    } else if (error.request) {
+      // 请求已发送但未收到响应
+      logger.error('API:Response', '未收到服务器响应', {
+        request: error.request,
+      });
+      error.message = '服务器未响应，请检查网络连接';
+    } else {
+      // 请求配置错误
+      logger.error('API:Response', '请求配置错误', {
+        error: error.message,
+      });
     }
 
     return Promise.reject(error);
   }
 );
+
+// 创建一个重试请求的包装函数
+const withRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000) => {
+  try {
+    return await fn();
+  } catch (error: any) {
+    if (retries > 0 && (error.response?.status >= 500 || !error.response)) {
+      logger.warn('API:Retry', `请求失败，将在${delay}ms后重试，剩余重试次数: ${retries - 1}`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      return withRetry(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+};
+
+// 导出增强的HTTP客户端
+export const httpWithRetry = {
+  get: (url: string, config?: any) => withRetry(() => http.get(url, config)),
+  post: (url: string, data?: any, config?: any) => withRetry(() => http.post(url, data, config)),
+  put: (url: string, data?: any, config?: any) => withRetry(() => http.put(url, data, config)),
+  delete: (url: string, config?: any) => withRetry(() => http.delete(url, config)),
+};
 
 export { http };
