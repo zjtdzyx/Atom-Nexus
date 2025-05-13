@@ -32,4 +32,12 @@ export default defineConfig({
       },
     },
   },
+  // 添加sourcemap支持
+  build: {
+    sourcemap: true,
+  },
+  // 开发模式下也启用sourcemap
+  css: {
+    devSourcemap: true,
+  },
 });
