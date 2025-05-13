@@ -70,87 +70,12 @@
           </div>
         </div>
 
-        <!-- 表格视图 -->
-        <div class="overflow-x-auto">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr class="bg-primary/60 text-left">
-                <th class="p-4 text-textlight font-medium">资源</th>
-                <th class="p-4 text-textlight font-medium">授权对象</th>
-                <th class="p-4 text-textlight font-medium">操作类型</th>
-                <th class="p-4 text-textlight font-medium">状态</th>
-                <th class="p-4 text-textlight font-medium">创建时间</th>
-                <th class="p-4 text-textlight font-medium">过期时间</th>
-                <th class="p-4 text-textlight font-medium">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="permission in filteredPermissions" :key="permission.id"
-                class="border-b border-gray-700 hover:bg-primary/30">
-                <td class="p-4 text-textlight">
-                  <div class="flex items-center">
-                    <span class="resource-icon mr-2" :class="{
-                      'i-carbon-certificate text-violet': permission.type === 'credential',
-                      'i-carbon-user-profile text-neon': permission.type === 'identity',
-                      'i-carbon-data-base text-blue-500': permission.type === 'data'
-                    }"></span>
-                    <div>
-                      <div class="font-medium">{{ getResourceName(permission) }}</div>
-                      <div class="text-xs text-textgray truncate max-w-xs">{{ permission.resourceId }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="p-4 text-textlight">
-                  <div>
-                    <div class="font-medium truncate max-w-xs">{{ formatDid(permission.subject) }}</div>
-                    <div v-if="permission.metadata?.subjectName" class="text-xs text-textgray">
-                      {{ permission.metadata.subjectName }}
-                    </div>
-                  </div>
-                </td>
-                <td class="p-4">
-                  <span class="px-2 py-1 text-xs rounded-full" :class="{
-                    'bg-green-500/20 text-green-500': permission.action === 'read',
-                    'bg-blue-500/20 text-blue-500': permission.action === 'write',
-                    'bg-yellow-500/20 text-yellow-500': permission.action === 'verify',
-                    'bg-red-500/20 text-red-500': permission.action === 'revoke',
-                    'bg-violet/20 text-violet': permission.action === 'admin'
-                  }">
-                    {{ getActionLabel(permission.action) }}
-                  </span>
-                </td>
-                <td class="p-4">
-                  <span class="px-2 py-1 text-xs rounded-full" :class="{
-                    'bg-green-500/20 text-green-500': permission.status === 'active',
-                    'bg-red-500/20 text-red-500': permission.status === 'revoked',
-                    'bg-yellow-500/20 text-yellow-500': permission.status === 'expired'
-                  }">
-                    {{ getStatusLabel(permission.status) }}
-                  </span>
-                </td>
-                <td class="p-4 text-textgray">
-                  {{ formatDate(permission.createdAt) }}
-                </td>
-                <td class="p-4 text-textgray">
-                  {{ permission.conditions?.expires ? formatDate(permission.conditions.expires) : '永久有效' }}
-                </td>
-                <td class="p-4">
-                  <div class="flex space-x-2">
-                    <button @click="openEditModal(permission)" class="p-1 text-textgray hover:text-neon">
-                      <span class="i-carbon-edit"></span>
-                    </button>
-                    <button v-if="permission.status === 'active'" @click="confirmRevoke(permission)"
-                      class="p-1 text-textgray hover:text-red-500">
-                      <span class="i-carbon-close"></span>
-                    </button>
-                    <button @click="viewDetails(permission)" class="p-1 text-textgray hover:text-neon">
-                      <span class="i-carbon-view"></span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- 使用PermissionCard组件展示权限 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="permission in filteredPermissions" :key="permission.id">
+            <PermissionCard :permission="permission" @view-details="viewDetails(permission)"
+              @edit="openEditModal(permission)" @revoke="confirmRevoke(permission)" />
+          </div>
         </div>
       </template>
     </div>
@@ -287,6 +212,8 @@
   import { useRouter } from 'vue-router';
   import { usePermissionStore, type Permission } from '../../stores/permission';
   import { logger } from '../../utils/logger';
+  import PermissionCard from '../../components/permission/PermissionCard.vue';
+  import PermissionForm from '../../components/permission/PermissionForm.vue';
 
   // 初始化路由和存储
   const router = useRouter();

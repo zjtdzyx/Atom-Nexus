@@ -1,6 +1,6 @@
 <template>
   <div class="identity-card card-atom p-6"
-    :class="{ 'border-neon/30': identity.bindStatus, 'border-metal/20': !identity.bindStatus }">
+    :class="{ 'border-neon/30': identity.isActive, 'border-metal/20': !identity.isActive }">
 
     <!-- 原子可视化效果 -->
     <div class="atom-visualization absolute inset-0 opacity-20">
@@ -14,12 +14,13 @@
       <!-- 头部 -->
       <div class="flex justify-between items-start">
         <div class="identity-icon w-12 h-12 rounded-full flex items-center justify-center"
-          :class="identity.bindStatus ? 'bg-neon/20 shadow-neon' : 'bg-primary/60'">
-          <div class="i-carbon-user-profile text-2xl" :class="identity.bindStatus ? 'text-neon' : 'text-metal'"></div>
+          :class="identity.isActive ? 'bg-neon/20 shadow-neon' : 'bg-primary/60'">
+          <div class="i-carbon-user-profile text-2xl" :class="identity.isActive ? 'text-neon' : 'text-metal'"></div>
         </div>
         <div class="identity-status px-3 py-1 rounded-full text-xs font-medium"
-          :class="identity.bindStatus ? 'bg-neon/20 text-neon border border-neon/30' : 'bg-primary/60 text-metal border border-metal/20'">
-          {{ identity.bindStatus ? '已绑定' : '未绑定' }}
+          :class="identity.status === IdentityStatus.ACTIVE ? 'bg-neon/20 text-neon border border-neon/30' : 'bg-primary/60 text-metal border border-metal/20'">
+          {{ identity.status === IdentityStatus.ACTIVE ? '活跃' : identity.status === IdentityStatus.INACTIVE ? '非活跃' :
+            '已撤销' }}
         </div>
       </div>
 
@@ -33,9 +34,13 @@
           <span class="i-carbon-time mr-1"></span>
           创建于 {{ formatDate(identity.createdAt) }}
         </div>
-        <div v-if="identity.bindType" class="text-xs text-textgray mt-1 flex items-center">
+        <div class="text-xs text-textgray mt-1 flex items-center">
           <span class="i-carbon-connection mr-1"></span>
-          绑定类型: {{ identity.bindType }}
+          类型: {{ identity.type }}
+        </div>
+        <div v-if="isDefault" class="text-xs text-neon mt-1 flex items-center">
+          <span class="i-carbon-star mr-1"></span>
+          默认身份
         </div>
       </div>
 
@@ -56,18 +61,17 @@
 </template>
 
 <script setup lang="ts">
-  import { defineProps } from 'vue';
+  import { defineProps, defineEmits } from 'vue';
   import { useRouter } from 'vue-router';
+  import { type Identity, IdentityStatus } from '../../types/identity';
+
+  // 定义事件
+  const emit = defineEmits(['view', 'toggle-dropdown', 'set-default', 'activate', 'deactivate', 'delete']);
 
   // 定义属性
   const props = defineProps<{
-    identity: {
-      id: string;
-      did: string;
-      createdAt: string;
-      bindStatus: boolean;
-      bindType?: string;
-    }
+    identity: Identity;
+    isDefault: boolean;
   }>();
 
   const router = useRouter();
@@ -104,7 +108,7 @@
 
   // 查看身份详情
   const viewDetails = (id: string) => {
-    router.push(`/identity/${id}`);
+    emit('view');
   };
 </script>
 

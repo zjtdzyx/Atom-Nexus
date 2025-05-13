@@ -23,7 +23,7 @@
     <!-- 主内容区 -->
     <div class="container py-6">
       <!-- 加载状态 -->
-      <div v-if="identityStore.isLoading" class="flex justify-center py-12">
+      <div v-if="identityStore.loading" class="flex justify-center py-12">
         <div class="i-carbon-circle-dash animate-spin text-4xl text-neon"></div>
       </div>
 
@@ -80,96 +80,40 @@
 
         <!-- 身份列表内容 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="identity in filteredIdentities" :key="identity.id"
-            class="card hover:bg-primary/20 hover:border-neon/50 transition-all duration-200">
-            <!-- 身份卡片内容 -->
-            <div class="identity-card">
-              <!-- 基本信息 -->
-              <div class="flex items-start justify-between mb-4">
-                <div class="flex items-center">
-                  <div class="avatar-wrapper mr-3 relative">
-                    <div
-                      class="w-12 h-12 rounded-full bg-violet/20 flex items-center justify-center text-neon overflow-hidden">
-                      <img v-if="identity.metadata?.avatar" :src="identity.metadata.avatar" alt="Avatar"
-                        class="w-full h-full object-cover">
-                      <span v-else class="text-xl">{{ identity.alias.charAt(0).toUpperCase() }}</span>
-                    </div>
-                    <div v-if="identity.isDefault"
-                      class="absolute -top-1 -right-1 w-5 h-5 bg-neon rounded-full flex items-center justify-center">
-                      <span class="i-carbon-star-filled text-xs text-primary"></span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-medium text-textlight">{{ identity.alias }}</h3>
-                    <div class="flex items-center">
-                      <span class="text-xs text-textgray">{{ identity.method }}</span>
-                      <span class="ml-2 px-2 py-0.5 text-xs rounded-full" :class="{
-                        'bg-green-500/20 text-green-500': identity.status === 'active',
-                        'bg-yellow-500/20 text-yellow-500': identity.status === 'inactive',
-                        'bg-red-500/20 text-red-500': identity.status === 'revoked'
-                      }">
-                        {{
-                          identity.status === 'active' ? '活跃' :
-                            identity.status === 'inactive' ? '非活跃' : '已撤销'
-                        }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div class="actions relative">
-                  <button @click.stop="toggleDropdown(identity.id)" class="p-1">
-                    <span class="i-carbon-overflow-menu-vertical text-textgray"></span>
+          <div v-for="identity in filteredIdentities" :key="identity.id">
+            <IdentityCard :identity="identity" :is-default="identity.isDefault" @view="navigateToIdentity(identity.id)"
+              @toggle-dropdown="toggleDropdown(identity.id)" @set-default="setAsDefault(identity)"
+              @activate="activateIdentity(identity)" @deactivate="deactivateIdentity(identity)"
+              @delete="confirmDelete(identity)" />
+            <!-- 下拉菜单 -->
+            <div v-if="openDropdown === identity.id" class="dropdown absolute z-10 rounded-lg shadow-lg p-2 bg-primary">
+              <ul>
+                <li>
+                  <router-link :to="`/identity/${identity.id}`" class="dropdown-item">
+                    <span class="i-carbon-view mr-2"></span>查看详情
+                  </router-link>
+                </li>
+                <li v-if="!identity.isDefault">
+                  <button class="dropdown-item" @click="setAsDefault(identity)">
+                    <span class="i-carbon-star mr-2"></span>设为默认
                   </button>
-                  <!-- 下拉菜单 -->
-                  <div v-if="openDropdown === identity.id"
-                    class="dropdown absolute right-0 top-8 w-48 bg-primary z-10 rounded-lg shadow-lg p-2">
-                    <ul>
-                      <li>
-                        <router-link :to="`/identity/${identity.id}`" class="dropdown-item">
-                          <span class="i-carbon-view mr-2"></span>查看详情
-                        </router-link>
-                      </li>
-                      <li v-if="!identity.isDefault">
-                        <button class="dropdown-item" @click="setAsDefault(identity)">
-                          <span class="i-carbon-star mr-2"></span>设为默认
-                        </button>
-                      </li>
-                      <li v-if="identity.status === 'active'">
-                        <button class="dropdown-item text-yellow-500" @click="deactivateIdentity(identity)">
-                          <span class="i-carbon-pause mr-2"></span>停用
-                        </button>
-                      </li>
-                      <li v-else-if="identity.status === 'inactive'">
-                        <button class="dropdown-item text-green-500" @click="activateIdentity(identity)">
-                          <span class="i-carbon-play mr-2"></span>激活
-                        </button>
-                      </li>
-                      <li>
-                        <button class="dropdown-item text-red-500" @click="confirmDelete(identity)">
-                          <span class="i-carbon-trash-can mr-2"></span>删除
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <!-- DID信息 -->
-              <div class="did-info mb-4">
-                <p class="text-sm font-mono bg-darkbg/50 rounded p-2 text-textgray overflow-hidden text-ellipsis">
-                  {{ identity.did }}
-                </p>
-              </div>
-
-              <!-- 元数据和操作 -->
-              <div class="flex justify-between items-center">
-                <div class="created-at text-xs text-textgray">
-                  创建于 {{ formatDate(identity.createdAt) }}
-                </div>
-                <router-link :to="`/identity/${identity.id}`" class="btn-secondary text-sm py-1">
-                  详情
-                </router-link>
-              </div>
+                </li>
+                <li v-if="identity.status === 'active'">
+                  <button class="dropdown-item text-yellow-500" @click="deactivateIdentity(identity)">
+                    <span class="i-carbon-pause mr-2"></span>停用
+                  </button>
+                </li>
+                <li v-else-if="identity.status === 'inactive'">
+                  <button class="dropdown-item text-green-500" @click="activateIdentity(identity)">
+                    <span class="i-carbon-play mr-2"></span>激活
+                  </button>
+                </li>
+                <li>
+                  <button class="dropdown-item text-red-500" @click="confirmDelete(identity)">
+                    <span class="i-carbon-trash-can mr-2"></span>删除
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -232,8 +176,10 @@
 <script setup lang="ts">
   import { ref, computed, onMounted, watch } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useIdentityStore, type Identity } from '../../stores/identity';
+  import { useIdentityStore, } from '../../stores/identity';
+  import { type Identity, IdentityStatus } from '../../types/identity';
   import { logger } from '../../utils/logger';
+  import IdentityCard from '../../components/identity/IdentityCard.vue';
 
   // 初始化路由和存储
   const router = useRouter();
@@ -338,6 +284,12 @@
     router.push('/identity/create');
   };
 
+  // 导航到身份详情页
+  const navigateToIdentity = (id: string) => {
+    logger.info('Page:Identity', '导航到身份详情页', { id });
+    router.push(`/identity/${id}`);
+  };
+
   // 打开绑定DID模态框
   const openBindModal = () => {
     showBindModal.value = true;
@@ -401,27 +353,31 @@
 
   // 停用身份
   const deactivateIdentity = async (identity: Identity) => {
-    logger.info('Page:Identity', '停用身份', { id: identity.id });
-    openDropdown.value = null;
+    logger.info('Page:Identity', '开始停用身份', { id: identity.id });
+    openDropdown.value = '';
 
     try {
-      await identityStore.updateIdentity(identity.id, { status: 'inactive' });
+      await identityStore.updateIdentity(identity.id, {
+        status: IdentityStatus.INACTIVE
+      });
+      logger.info('Page:Identity', '身份停用成功', { id: identity.id });
     } catch (error: any) {
-      // 错误处理
-      console.error('停用身份失败', error);
+      logger.error('Page:Identity', '身份停用失败', { id: identity.id, error: error.message });
     }
   };
 
   // 激活身份
   const activateIdentity = async (identity: Identity) => {
-    logger.info('Page:Identity', '激活身份', { id: identity.id });
-    openDropdown.value = null;
+    logger.info('Page:Identity', '开始激活身份', { id: identity.id });
+    openDropdown.value = '';
 
     try {
-      await identityStore.updateIdentity(identity.id, { status: 'active' });
+      await identityStore.updateIdentity(identity.id, {
+        status: IdentityStatus.ACTIVE
+      });
+      logger.info('Page:Identity', '身份激活成功', { id: identity.id });
     } catch (error: any) {
-      // 错误处理
-      console.error('激活身份失败', error);
+      logger.error('Page:Identity', '身份激活失败', { id: identity.id, error: error.message });
     }
   };
 

@@ -507,18 +507,49 @@
   const handleQrCodeDetected = async (data: string) => {
     logger.info('Page:CredentialVerify', '处理QR码检测到的数据', { data });
 
-    // 检查是否为凭证URL或ID
-    if (data.startsWith('http')) {
-      // 从URL中提取ID
-      const id = data.split('/').pop();
-      if (id) {
-        credentialId.value = id;
-        await verifyCredentialById();
+    try {
+      isVerifying.value = true;
+
+      // 检查是否为凭证URL或ID
+      if (data.startsWith('http')) {
+        // 从URL中提取ID
+        const id = data.split('/').pop();
+        if (id) {
+          credentialId.value = id;
+          // 尝试使用ID验证
+          const result = await credentialStore.verifyCredential(id);
+          verifyResult.value = result;
+
+          // 获取凭证详情
+          await credentialStore.fetchCredentialById(id);
+          verifiedCredential.value = credentialStore.currentCredential;
+
+          logger.info('Page:CredentialVerify', '通过二维码URL验证成功', { id });
+        }
+      } else {
+        // 尝试解析为JSON
+        try {
+          const jsonData = JSON.parse(data);
+          await performVerification(jsonData);
+          logger.info('Page:CredentialVerify', '通过二维码JSON验证成功');
+        } catch (jsonError) {
+          // 如果不是JSON，则作为ID使用
+          credentialId.value = data;
+          const result = await credentialStore.verifyCredential(data);
+          verifyResult.value = result;
+
+          // 获取凭证详情
+          await credentialStore.fetchCredentialById(data);
+          verifiedCredential.value = credentialStore.currentCredential;
+
+          logger.info('Page:CredentialVerify', '通过二维码ID验证成功', { id: data });
+        }
       }
-    } else {
-      // 直接作为ID使用
-      credentialId.value = data;
-      await verifyCredentialById();
+    } catch (error: any) {
+      logger.error('Page:CredentialVerify', '二维码验证失败', { error: error.message });
+      alert(`验证失败: ${error.message}`);
+    } finally {
+      isVerifying.value = false;
     }
   };
 
