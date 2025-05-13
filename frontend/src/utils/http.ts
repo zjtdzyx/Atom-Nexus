@@ -1,9 +1,13 @@
 import axios from 'axios';
 import { logger } from './logger';
 
+// 记录API基本URL配置，便于调试
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+logger.info('API:Config', `API基本URL: ${apiBaseUrl || '(未设置，使用相对路径)'}`);
+
 // 创建axios实例
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  baseURL: apiBaseUrl,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
@@ -13,9 +17,12 @@ const http = axios.create({
 // 请求拦截器
 http.interceptors.request.use(
   (config) => {
-    // 记录请求日志
-    logger.info('API:Request', `开始请求: ${config.method?.toUpperCase()} ${config.url}`, {
+    // 详细的请求日志，包括完整URL
+    const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+    logger.info('API:Request', `开始请求: ${config.method?.toUpperCase()} ${fullUrl}`, {
+      fullUrl,
       url: config.url,
+      baseURL: config.baseURL,
       method: config.method,
       params: config.params,
       data: config.data,
@@ -25,6 +32,9 @@ http.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+      logger.debug('API:Auth', '添加认证令牌到请求头');
+    } else if (!token) {
+      logger.debug('API:Auth', '请求不含认证令牌');
     }
 
     return config;
@@ -39,23 +49,28 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response) => {
     // 记录响应成功日志
-    logger.info(
-      'API:Response',
-      `请求成功: ${response.config.method?.toUpperCase()} ${response.config.url}`,
-      {
-        url: response.config.url,
-        status: response.status,
-        statusText: response.statusText,
-        data: response.data,
-      }
-    );
+    const fullUrl = response.config.baseURL
+      ? `${response.config.baseURL}${response.config.url}`
+      : response.config.url;
+    logger.info('API:Response', `请求成功: ${response.config.method?.toUpperCase()} ${fullUrl}`, {
+      fullUrl,
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
 
+    // 返回响应数据而不是整个响应对象
     return response.data;
   },
   async (error) => {
-    // 记录响应错误日志
+    // 记录详细的响应错误日志
+    const fullUrl = error.config?.baseURL
+      ? `${error.config.baseURL}${error.config.url}`
+      : error.config?.url;
     logger.error('API:Response', '请求失败', {
+      fullUrl,
       url: error.config?.url,
+      baseURL: error.config?.baseURL,
       status: error.response?.status,
       statusText: error.response?.statusText,
       data: error.response?.data,
@@ -74,7 +89,9 @@ http.interceptors.response.use(
             logger.info('API:Auth', '尝试刷新令牌');
 
             // 刷新令牌的逻辑
-            const response = await axios.post('/api/auth/refresh-token', { refreshToken });
+            const response = await axios.post(`${apiBaseUrl}/api/auth/refresh-token`, {
+              refreshToken,
+            });
 
             if (response.data && response.data.accessToken) {
               // 保存新令牌
@@ -89,25 +106,26 @@ http.interceptors.response.use(
           } catch (refreshError) {
             logger.error('API:Auth', '刷新令牌失败', refreshError);
             // 刷新失败，重定向到登录页
-            window.location.href = '/auth/login';
+            window.location.href = '/auth/login?error=token_refresh_failed';
           }
         } else {
           // 没有刷新令牌，必须重新登录
           logger.warn('API:Response', '用户未授权，需要重新登录');
-          window.location.href = '/auth/login';
+          window.location.href = '/auth/login?error=unauthorized';
         }
       }
       // 权限不足
       else if (status === 403) {
         logger.warn('API:Response', '权限不足，无法访问资源');
+        window.location.href = '/auth/login?error=forbidden';
       }
       // 资源不存在
       else if (status === 404) {
-        logger.warn('API:Response', '请求的资源不存在');
+        logger.warn('API:Response', `请求的资源不存在: ${fullUrl}`);
       }
       // 服务器错误
       else if (status === 500) {
-        logger.error('API:Response', '服务器内部错误');
+        logger.error('API:Response', `服务器内部错误: ${fullUrl}`);
       }
       // 其他错误
       else {
@@ -120,7 +138,7 @@ http.interceptors.response.use(
       }
     } else if (error.request) {
       // 请求已发送但未收到响应
-      logger.error('API:Response', '未收到服务器响应', {
+      logger.error('API:Response', `未收到服务器响应: ${fullUrl}`, {
         request: error.request,
       });
       error.message = '服务器未响应，请检查网络连接';

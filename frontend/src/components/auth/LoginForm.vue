@@ -33,15 +33,15 @@
       </div>
 
       <!-- 错误提示 -->
-      <div v-if="error" class="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
-        {{ error }}
+      <div v-if="errorMessage" class="p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
+        {{ errorMessage }}
       </div>
 
       <div class="form-group">
         <button type="submit"
           class="w-full py-3 px-4 bg-gradient-to-r from-neon to-violet text-black font-medium rounded-lg transition-all hover:shadow-neon"
-          :disabled="loading">
-          <span v-if="loading" class="inline-block animate-spin mr-2">⟳</span>
+          :disabled="isLoading">
+          <span v-if="isLoading" class="inline-block animate-spin mr-2">⟳</span>
           登录
         </button>
       </div>
@@ -57,22 +57,20 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive } from 'vue';
+  import { ref, reactive, computed } from 'vue';
 
   // 定义事件
   const emit = defineEmits(['login', 'show-register', 'forgot-password']);
 
   // 定义属性
-  const props = defineProps({
-    loading: {
-      type: Boolean,
-      default: false
-    },
-    error: {
-      type: String,
-      default: ''
-    }
-  });
+  const props = defineProps<{
+    loading?: boolean;
+    error?: string | null;
+  }>();
+
+  // 派生状态
+  const isLoading = computed(() => props.loading || false);
+  const errorMessage = computed(() => props.error || '');
 
   // 状态管理
   const showPassword = ref(false);

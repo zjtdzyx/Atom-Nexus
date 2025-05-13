@@ -1,25 +1,21 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Did } from '../../did/entities/did.entity';
-import { Credential } from '../../credential/entities/credential.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class AuthLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'did_id' })
+  @Column({ nullable: true })
+  userId: string;
+
+  @Column({ nullable: true })
+  username: string;
+
+  @Column({ nullable: true })
   didId: string;
 
-  @ManyToOne(() => Did)
-  @JoinColumn({ name: 'did_id' })
-  did: Did;
-
-  @Column({ name: 'credential_id', nullable: true })
+  @Column({ nullable: true })
   credentialId: string;
-
-  @ManyToOne(() => Credential, { nullable: true })
-  @JoinColumn({ name: 'credential_id' })
-  credential: Credential;
 
   @Column()
   action: string;
@@ -27,6 +23,9 @@ export class AuthLog {
   @Column()
   success: boolean;
 
-  @Column()
+  @Column({ type: 'text', nullable: true })
+  details: string;
+
+  @CreateDateColumn()
   timestamp: Date;
 }
