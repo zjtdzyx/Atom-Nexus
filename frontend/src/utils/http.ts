@@ -22,7 +22,7 @@ http.interceptors.request.use(
     });
 
     // 从本地存储获取token
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('accessToken');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -52,7 +52,7 @@ http.interceptors.response.use(
 
     return response.data;
   },
-  (error) => {
+  async (error) => {
     // 记录响应错误日志
     logger.error('API:Response', '请求失败', {
       url: error.config?.url,
@@ -64,27 +64,54 @@ http.interceptors.response.use(
 
     // 处理特定HTTP状态码
     if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          // 未授权，可能需要重新登录
+      const status = error.response.status;
+
+      // 处理401未授权错误
+      if (status === 401) {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          try {
+            logger.info('API:Auth', '尝试刷新令牌');
+
+            // 刷新令牌的逻辑
+            const response = await axios.post('/api/auth/refresh-token', { refreshToken });
+
+            if (response.data && response.data.accessToken) {
+              // 保存新令牌
+              localStorage.setItem('accessToken', response.data.accessToken);
+
+              // 重试原请求
+              const config = error.config;
+              config.headers.Authorization = `Bearer ${response.data.accessToken}`;
+              logger.info('API:Auth', '令牌已刷新，重试原请求');
+              return axios(config);
+            }
+          } catch (refreshError) {
+            logger.error('API:Auth', '刷新令牌失败', refreshError);
+            // 刷新失败，重定向到登录页
+            window.location.href = '/auth/login';
+          }
+        } else {
+          // 没有刷新令牌，必须重新登录
           logger.warn('API:Response', '用户未授权，需要重新登录');
           window.location.href = '/auth/login';
-          break;
-        case 403:
-          // 权限不足
-          logger.warn('API:Response', '权限不足，无法访问资源');
-          break;
-        case 404:
-          // 资源不存在
-          logger.warn('API:Response', '请求的资源不存在');
-          break;
-        case 500:
-          // 服务器错误
-          logger.error('API:Response', '服务器内部错误');
-          break;
-        default:
-          logger.warn('API:Response', `未处理的HTTP错误状态码: ${error.response.status}`);
-          break;
+        }
+      }
+      // 权限不足
+      else if (status === 403) {
+        logger.warn('API:Response', '权限不足，无法访问资源');
+      }
+      // 资源不存在
+      else if (status === 404) {
+        logger.warn('API:Response', '请求的资源不存在');
+      }
+      // 服务器错误
+      else if (status === 500) {
+        logger.error('API:Response', '服务器内部错误');
+      }
+      // 其他错误
+      else {
+        logger.warn('API:Response', `未处理的HTTP错误状态码: ${status}`);
       }
 
       // 优先使用服务器返回的错误信息

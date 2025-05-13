@@ -9,6 +9,7 @@ import { DeveloperModule } from './modules/developer/developer.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SecurityModule } from './modules/security/security.module';
+import { IdentityModule } from './modules/identity/identity.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { SecurityModule } from './modules/security/security.module';
     AdminModule,
     StorageModule,
     SecurityModule,
+    IdentityModule,
   ],
   controllers: [],
   providers: [],

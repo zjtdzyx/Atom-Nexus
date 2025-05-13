@@ -57,3 +57,5 @@ alwaysApply: false
   "data": {}
 
 }
+
+数据库启动命令:pg_ctl start

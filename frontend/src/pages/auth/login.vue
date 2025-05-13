@@ -29,8 +29,8 @@
       <div class="form-group">
         <button type="submit"
           class="w-full py-3 px-4 bg-gradient-to-r from-neon to-violet text-black font-medium rounded-lg transition-all hover:shadow-neon"
-          :disabled="isLoading">
-          <span v-if="isLoading" class="inline-block animate-spin mr-2">⟳</span>
+          :disabled="authStore.loading">
+          <span v-if="authStore.loading" class="inline-block animate-spin mr-2">⟳</span>
           登录
         </button>
       </div>
@@ -43,19 +43,26 @@
       </p>
     </div>
 
-    <div v-if="error" class="mt-6 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
-      {{ error }}
+    <div v-if="authStore.error" class="mt-6 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400 text-sm">
+      {{ authStore.error }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { reactive, onMounted } from 'vue';
+  import { useRouter, useRoute } from 'vue-router';
+  import { useAuthStore } from '../../stores/auth';
+  import { logger } from '../../utils/logger';
 
   const router = useRouter();
-  const error = ref('');
-  const isLoading = ref(false);
+  const route = useRoute();
+  const authStore = useAuthStore();
+
+  // 如果用户已登录，直接跳转到首页
+  if (authStore.isAuthenticated) {
+    router.push('/');
+  }
 
   const form = reactive({
     username: '',
@@ -65,23 +72,25 @@
 
   const handleLogin = async () => {
     try {
-      isLoading.value = true;
-      error.value = '';
+      // 调用认证存储的登录方法
+      await authStore.loginUser(form.username, form.password, form.remember);
 
-      // 这里应该调用实际的登录API
-      console.log('登录表单提交', form);
+      // 记录登录成功
+      logger.info('Page:Login', '用户登录成功', { username: form.username });
 
-      // 模拟登录延迟
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 获取重定向地址
+      const redirectPath = route.query.redirect as string || '/';
 
-      // 模拟登录成功
-      router.push('/');
+      // 登录成功后跳转到重定向页面或首页
+      router.push(redirectPath);
     } catch (err: any) {
-      error.value = err.message || '登录失败，请重试';
-    } finally {
-      isLoading.value = false;
+      logger.error('Page:Login', '登录失败', err);
     }
   };
+
+  onMounted(() => {
+    logger.info('Page:Login', '登录页面已加载');
+  });
 </script>
 
 <style scoped>

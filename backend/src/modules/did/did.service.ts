@@ -7,12 +7,34 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateDidDto, RecoverDidDto } from './dto';
-import { DIDDocument, DIDInfo } from './interfaces/did.interface';
-import { ApiResponse } from '../../common/interfaces/response.interface';
 import * as crypto from 'crypto';
+import { CreateDidDto, RecoverDidDto } from './dto';
 import { Did } from './entities/did.entity';
 import { DidDocument } from './entities/did-document.entity';
+import { ApiResponse } from '../../common/interfaces/response.interface';
+
+// DID文档接口
+export interface DIDDocument {
+  '@context': string[];
+  id: string;
+  controller: string;
+  verificationMethod: Array<{
+    id: string;
+    type: string;
+    controller: string;
+    publicKeyHex: string;
+  }>;
+  authentication: string[];
+}
+
+// DID信息接口
+export interface DIDInfo {
+  did: string;
+  method: string;
+  identifier: string;
+  recoveryEmail?: string;
+  createdAt: Date;
+}
 
 @Injectable()
 export class DidService {
@@ -85,7 +107,7 @@ export class DidService {
       // 存储DID文档到数据库
       const didDoc = this.didDocumentRepository.create({
         id: did,
-        context: didDocument['@context'],
+        context: didDocument['@context'] as string[],
         controller: didDocument.controller,
         verificationMethod: didDocument.verificationMethod,
         authentication: didDocument.authentication,
@@ -278,14 +300,18 @@ export class DidService {
   private generateKeyPair(): { publicKey: string; privateKey: string } {
     // 实际应用中应使用更安全的密钥对生成方法
     // 这里使用简化的示例
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519', {
-      publicKeyEncoding: { type: 'spki', format: 'der' },
-      privateKeyEncoding: { type: 'pkcs8', format: 'der' },
+    const keyPair = crypto.generateKeyPairSync('ed25519', {
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
     });
 
+    // 转换为十六进制字符串
+    const publicKeyHex = Buffer.from(keyPair.publicKey).toString('hex');
+    const privateKeyHex = Buffer.from(keyPair.privateKey).toString('hex');
+
     return {
-      publicKey: Buffer.from(publicKey).toString('hex'),
-      privateKey: Buffer.from(privateKey).toString('hex'),
+      publicKey: publicKeyHex,
+      privateKey: privateKeyHex,
     };
   }
 }

@@ -17,7 +17,7 @@ export const credentialService = {
    * @param params 查询参数
    */
   getCredentials(params?: any): Promise<ApiResponse<Credential[]>> {
-    return http.get('/api/credential', { params });
+    return http.get('/api/credentials', { params });
   },
 
   /**
@@ -25,7 +25,7 @@ export const credentialService = {
    * @param id 凭证ID
    */
   getCredentialById(id: string): Promise<ApiResponse<Credential>> {
-    return http.get(`/api/credential/${id}`);
+    return http.get(`/api/credentials/${id}`);
   },
 
   /**
@@ -33,7 +33,7 @@ export const credentialService = {
    * @param data 凭证数据
    */
   issueCredential(data: any): Promise<ApiResponse<Credential>> {
-    return http.post('/api/credential/issue', data);
+    return http.post('/api/credentials/issue', data);
   },
 
   /**
@@ -41,7 +41,7 @@ export const credentialService = {
    * @param id 凭证ID
    */
   verifyCredential(id: string): Promise<ApiResponse<VerifyResult>> {
-    return http.post(`/api/credential/${id}/verify`);
+    return http.post(`/api/credentials/${id}/verify`);
   },
 
   /**
@@ -49,7 +49,7 @@ export const credentialService = {
    * @param credentialJson 凭证JSON
    */
   verifyCredentialJson(credentialJson: any): Promise<ApiResponse<VerifyResult>> {
-    return http.post('/api/credential/verify', { credential: credentialJson });
+    return http.post('/api/credentials/verify', { credential: credentialJson });
   },
 
   /**
@@ -58,7 +58,7 @@ export const credentialService = {
    * @param reason 撤销原因
    */
   revokeCredential(id: string, reason?: string): Promise<ApiResponse<void>> {
-    return http.post(`/api/credential/${id}/revoke`, { reason });
+    return http.post(`/api/credentials/${id}/revoke`, { reason });
   },
 
   /**
@@ -66,14 +66,14 @@ export const credentialService = {
    * @param id 凭证ID
    */
   deleteCredential(id: string): Promise<ApiResponse<void>> {
-    return http.delete(`/api/credential/${id}`);
+    return http.delete(`/api/credentials/${id}`);
   },
 
   /**
    * 获取凭证模板列表
    */
   getCredentialTemplates(): Promise<ApiResponse<any[]>> {
-    return http.get('/api/credential/templates');
+    return http.get('/api/credentials/templates');
   },
 
   /**
@@ -85,7 +85,7 @@ export const credentialService = {
     id: string,
     options?: any
   ): Promise<ApiResponse<{ url: string; expiresAt?: string }>> {
-    return http.post(`/api/credential/${id}/share`, options);
+    return http.post(`/api/credentials/${id}/share`, options);
   },
 
   /**
@@ -93,7 +93,7 @@ export const credentialService = {
    * @param id 凭证ID
    */
   getCredentialHistory(id: string): Promise<ApiResponse<any[]>> {
-    return http.get(`/api/credential/${id}/history`);
+    return http.get(`/api/credentials/${id}/history`);
   },
 
   /**
@@ -101,7 +101,7 @@ export const credentialService = {
    * @param did DID
    */
   getCredentialsByDid(did: string): Promise<ApiResponse<Credential[]>> {
-    return http.get('/api/credential', { params: { did } });
+    return http.get('/api/credentials', { params: { did } });
   },
 
   /**
@@ -113,13 +113,13 @@ export const credentialService = {
     id: string,
     format: 'json' | 'jwt' | 'jsonld' = 'json'
   ): Promise<ApiResponse<any>> {
-    return http.get(`/api/credential/${id}/export`, { params: { format } });
+    return http.get(`/api/credentials/${id}/export`, { params: { format } });
   },
 
   /**
    * 获取凭证统计信息
    */
   getCredentialStats(): Promise<ApiResponse<any>> {
-    return http.get('/api/credential/stats');
+    return http.get('/api/credentials/stats');
   },
 };

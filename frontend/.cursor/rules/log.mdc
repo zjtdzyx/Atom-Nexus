@@ -1,0 +1,49 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+请为 Atom Nexus 项目的前端代码自动添加调试日志功能，规范如下：
+
+【全局日志工具】
+- 请在 `src/utils/logger.ts` 中创建一个日志工具 `logger`，包含以下方法：
+  - `logger.info(tag: string, message: string, data?: any)`
+  - `logger.warn(tag: string, message: string, data?: any)`
+  - `logger.error(tag: string, message: string, data?: any)`
+
+【页面级日志】
+- 在每个页面组件（`pages/` 下）中：
+  - 在 `onMounted()` 时，自动调用 `logger.info` 打印当前页面加载日志：
+    - Tag 使用当前页面模块名，如 `Page:Identity`
+    - Message 为 `页面已加载`
+  - 如有路由跳转逻辑，必须调用 `logger.info` 打印跳转前后的路由地址
+
+【组件级日志】
+- 在每个组件（`components/` 下）中：
+  - 在 `onMounted()` 时，调用 `logger.info` 打印当前组件加载日志：
+    - Tag 使用 `Component:<组件名>`，Message 为 `组件已加载`
+  - 所有按钮点击、交互事件，必须调用 `logger.info` 打印点击日志：
+    - 如：`logger.info('Component:LoginButton', '点击了登录按钮')`
+
+【API 调用日志】
+- 所有 API 请求函数，在请求前调用：
+  - `logger.info('API:<模块名>', '开始请求', { url, params })`
+- 请求成功后调用：
+  - `logger.info('API:<模块名>', '请求成功', response)`
+- 请求失败时调用：
+  - `logger.error('API:<模块名>', '请求失败', error)`
+
+【路由跳转日志】
+- 所有通过 `router.push()` 进行跳转时，必须调用 `logger.info` 打印跳转日志：
+  - Tag 使用 `Router`
+  - Message 为 `跳转到 <目标路由地址>`
+
+【日志输出规则】
+- 开发环境下（`process.env.NODE_ENV === 'development'`）直接打印到浏览器控制台
+- 生产环境下，日志工具可以拓展支持发送到后端日志服务器（预留接口）
+
+【自动化要求】
+- 请自动扫描项目代码，为所有页面、组件、API 请求、路由跳转添加上述日志逻辑
+- 删除或修正现有不规范或遗漏日志的代码
+
+现在请开始。

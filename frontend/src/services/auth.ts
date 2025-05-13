@@ -1,4 +1,4 @@
-import http from '../utils/http';
+import { http } from '../utils/http';
 import type { AxiosResponse } from 'axios';
 
 // 用户登录请求参数

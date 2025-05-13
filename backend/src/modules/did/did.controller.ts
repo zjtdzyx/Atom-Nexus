@@ -1,8 +1,7 @@
 import { Controller, Get, Post, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { DidService } from './did.service';
+import { ApiTags, ApiOperation, ApiResponse as SwaggerResponse, ApiParam } from '@nestjs/swagger';
+import { DidService, DIDDocument, DIDInfo } from './did.service';
 import { CreateDidDto, RecoverDidDto } from './dto';
-import { DIDDocument, DIDInfo } from './interfaces/did.interface';
 
 @ApiTags('DID')
 @Controller('did')
@@ -15,7 +14,7 @@ export class DidController {
     summary: '注册DID',
     description: '通过钱包地址、邮箱或社交账号创建去中心化身份',
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 201,
     description: 'DID创建成功',
     schema: {
@@ -68,7 +67,7 @@ export class DidController {
       },
     },
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 400,
     description: '参数错误',
     schema: {
@@ -92,7 +91,7 @@ export class DidController {
     summary: '恢复DID',
     description: '通过多重身份验证信息恢复DID',
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 200,
     description: 'DID恢复成功',
     schema: {
@@ -110,7 +109,7 @@ export class DidController {
       },
     },
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 400,
     description: 'DID恢复失败',
     schema: {
@@ -121,7 +120,7 @@ export class DidController {
       },
     },
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 401,
     description: '身份验证失败',
     schema: {
@@ -146,7 +145,7 @@ export class DidController {
     description: 'DID标识符',
     example: 'did:email:1234567890abcdef',
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 200,
     description: '成功获取用户信息',
     schema: {
@@ -172,7 +171,7 @@ export class DidController {
       },
     },
   })
-  @ApiResponse({
+  @SwaggerResponse({
     status: 404,
     description: 'DID不存在',
     schema: {
