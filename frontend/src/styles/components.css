@@ -1,0 +1,193 @@
+/* Atom Nexus 组件样式 */
+
+/* 卡片样式 */
+.card-atom {
+  @apply bg-primary/80 backdrop-blur-sm border border-neon/10 rounded-xl shadow-md transition-all duration-300;
+}
+
+.card-atom:hover {
+  @apply shadow-lg border-neon/20;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  @apply bg-gradient-to-r from-neon to-violet text-black font-medium rounded-full px-4 py-2 
+  flex items-center justify-center shadow-md hover:shadow-neon transition-all 
+  disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply bg-primary/80 border border-neon/20 text-textlight font-medium rounded-full px-4 py-2 
+  flex items-center justify-center hover:bg-primary/60 hover:border-neon/30 transition-all
+  disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-outline {
+  @apply bg-transparent border border-neon/30 text-neon font-medium rounded-full px-4 py-2 
+  flex items-center justify-center hover:bg-neon/10 transition-all
+  disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-danger {
+  @apply bg-transparent border border-red-500/30 text-red-400 font-medium rounded-full px-4 py-2 
+  flex items-center justify-center hover:bg-red-500/10 transition-all
+  disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* 输入框样式 */
+.input-atom {
+  @apply w-full px-5 py-3 bg-darkbg/50 border border-neon/20 rounded-full text-textlight 
+  focus:outline-none focus:border-neon focus:shadow-neon transition-all;
+}
+
+.textarea-atom {
+  @apply w-full px-5 py-3 bg-darkbg/50 border border-neon/20 rounded-xl text-textlight 
+  focus:outline-none focus:border-neon focus:shadow-neon transition-all;
+  min-height: 120px;
+}
+
+/* 标签样式 */
+.tag-atom {
+  @apply inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium
+  border border-neon/20 bg-neon/10 text-neon;
+}
+
+.tag-atom-alt {
+  @apply inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium
+  border border-violet/20 bg-violet/10 text-violet;
+}
+
+/* 动画特效 */
+.orbit-animation {
+  animation: orbit 15s linear infinite;
+}
+
+.orbit-animation-reverse {
+  animation: orbit 20s linear infinite reverse;
+}
+
+.pulse-animation {
+  animation: pulse-slow 3s infinite;
+}
+
+.network-line-animation {
+  animation: line-flash 5s infinite ease-in-out;
+}
+
+/* 发光效果 */
+.glow-neon {
+  filter: drop-shadow(0 0 5px var(--color-neon));
+}
+
+.shadow-neon {
+  box-shadow: 0 0 15px rgba(12, 255, 225, 0.3);
+}
+
+.shadow-violet {
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+/* 布局组件 */
+.page-header {
+  @apply relative py-6 border-b border-neon/10 bg-primary/90 backdrop-blur-sm overflow-hidden;
+}
+
+.page-header::before {
+  content: '';
+  @apply absolute -bottom-5 left-0 right-0 h-20 bg-gradient-to-t from-transparent to-neon/5 opacity-30;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-textlight flex items-center gap-2;
+}
+
+.page-title::before {
+  content: '';
+  @apply w-1 h-8 bg-neon/70 rounded-full;
+}
+
+/* 网格布局 */
+.grid-atom {
+  @apply grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+/* 加载动画 */
+.loading-atom {
+  @apply relative flex items-center justify-center p-8;
+}
+
+.loading-atom::before {
+  content: '';
+  @apply absolute w-12 h-12 rounded-full border-2 border-transparent border-t-neon animate-spin;
+}
+
+.loading-atom::after {
+  content: '';
+  @apply absolute w-6 h-6 rounded-full bg-neon/20 animate-pulse;
+}
+
+/* 轨道效果 */
+.orbit-ring {
+  @apply absolute rounded-full border border-neon/20;
+  animation: orbit 15s linear infinite;
+}
+
+/* 原子核心元素 */
+.atom-core {
+  @apply absolute w-2 h-2 rounded-full bg-neon shadow-neon z-10;
+  box-shadow: 0 0 10px var(--color-neon), 0 0 20px var(--color-neon);
+}
+
+.atom-orbit-1 {
+  @apply absolute rounded-full w-8 h-8 border border-neon/20;
+  animation: orbit 10s linear infinite;
+}
+
+.atom-orbit-2 {
+  @apply absolute rounded-full w-14 h-14 border border-neon/20;
+  animation: orbit 15s linear infinite reverse;
+}
+
+.atom-particle {
+  @apply absolute w-1 h-1 rounded-full bg-neon shadow-neon;
+  box-shadow: 0 0 5px var(--color-neon);
+}
+
+/* 动画关键帧 */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes line-flash {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .orbit-animation, .orbit-animation-reverse {
+    animation-duration: 30s; /* 移动端降低动画频率，提高性能 */
+  }
+  
+  .pulse-animation {
+    animation-duration: 5s;
+  }
+} 

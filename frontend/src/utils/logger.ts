@@ -1,177 +1,226 @@
 /**
- * 全局日志工具
- * 用于记录前端操作日志、API调用日志和页面加载日志
+ * Atom Nexus 日志工具
+ * 用于统一管理应用内的日志记录和输出
  */
 
-// 日志级别类型
-type LogLevel = 'info' | 'warn' | 'error';
+// 日志级别
+export enum LogLevel {
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
+  DEBUG = 'debug',
+}
+
+// 日志配置
+interface LoggerConfig {
+  enableConsole: boolean; // 是否在控制台输出
+  enableRemote: boolean; // 是否发送到远程服务器
+  minLevel: LogLevel; // 最低记录级别
+  remoteUrl?: string; // 远程服务器URL
+}
+
+// 默认配置
+const defaultConfig: LoggerConfig = {
+  enableConsole: process.env.NODE_ENV === 'development',
+  enableRemote: process.env.NODE_ENV === 'production',
+  minLevel: process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO,
+  remoteUrl: '/api/logs',
+};
 
 // 日志条目接口
-interface LogEntry {
+export interface LogEntry {
   level: LogLevel;
   tag: string;
   message: string;
   data?: any;
   timestamp: string;
+  sessionId?: string;
 }
 
 /**
- * 日志管理器
+ * 日志管理类
  */
 class Logger {
-  private logs: LogEntry[] = [];
-  private maxLogSize = 1000; // 内存中保留的最大日志条数
-  private apiEndpoint: string | null = null; // 生产环境日志服务器地址
+  private config: LoggerConfig;
+  private sessionId: string;
+  private logQueue: LogEntry[] = [];
+  private readonly MAX_QUEUE_SIZE = 50;
+  private flushInterval: number | null = null;
+
+  constructor(config: Partial<LoggerConfig> = {}) {
+    this.config = { ...defaultConfig, ...config };
+    this.sessionId = this.generateSessionId();
+
+    // 在生产环境中设置定期发送日志到服务器
+    if (this.config.enableRemote) {
+      this.flushInterval = window.setInterval(() => this.flushLogs(), 30000);
+    }
+
+    // 页面卸载前尝试发送剩余日志
+    window.addEventListener('beforeunload', () => {
+      if (this.logQueue.length > 0) {
+        this.flushLogs();
+      }
+    });
+  }
 
   /**
-   * 输出信息级别日志
-   * @param tag 日志标签（模块名/组件名）
-   * @param message 日志信息
-   * @param data 可选的附加数据
+   * 生成会话ID
+   */
+  private generateSessionId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  /**
+   * 记录信息日志
    */
   public info(tag: string, message: string, data?: any): void {
-    this.log('info', tag, message, data);
+    this.log(LogLevel.INFO, tag, message, data);
   }
 
   /**
-   * 输出警告级别日志
-   * @param tag 日志标签（模块名/组件名）
-   * @param message 日志信息
-   * @param data 可选的附加数据
+   * 记录警告日志
    */
   public warn(tag: string, message: string, data?: any): void {
-    this.log('warn', tag, message, data);
+    this.log(LogLevel.WARN, tag, message, data);
   }
 
   /**
-   * 输出错误级别日志
-   * @param tag 日志标签（模块名/组件名）
-   * @param message 日志信息
-   * @param data 可选的附加数据
+   * 记录错误日志
    */
   public error(tag: string, message: string, data?: any): void {
-    this.log('error', tag, message, data);
+    this.log(LogLevel.ERROR, tag, message, data);
   }
 
   /**
-   * 内部日志记录方法
+   * 记录调试日志
+   */
+  public debug(tag: string, message: string, data?: any): void {
+    this.log(LogLevel.DEBUG, tag, message, data);
+  }
+
+  /**
+   * 通用日志记录方法
    */
   private log(level: LogLevel, tag: string, message: string, data?: any): void {
-    const logEntry: LogEntry = {
-      level,
-      tag,
-      message,
-      data,
-      timestamp: new Date().toISOString(),
-    };
+    // 检查日志级别
+    if (this.shouldLog(level)) {
+      const logEntry: LogEntry = {
+        level,
+        tag,
+        message,
+        data,
+        timestamp: new Date().toISOString(),
+        sessionId: this.sessionId,
+      };
 
-    // 添加到内存日志数组
-    this.logs.push(logEntry);
+      // 控制台输出
+      if (this.config.enableConsole) {
+        this.consoleLog(logEntry);
+      }
 
-    // 如果超过最大日志条数，删除最早的日志
-    if (this.logs.length > this.maxLogSize) {
-      this.logs.shift();
+      // 添加到队列，准备发送到服务器
+      if (this.config.enableRemote) {
+        this.logQueue.push(logEntry);
+
+        // 如果队列已满，立即发送
+        if (this.logQueue.length >= this.MAX_QUEUE_SIZE) {
+          this.flushLogs();
+        }
+      }
+    }
+  }
+
+  /**
+   * 判断是否应该记录此级别的日志
+   */
+  private shouldLog(level: LogLevel): boolean {
+    const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
+    const minLevelIndex = levels.indexOf(this.config.minLevel);
+    const currentLevelIndex = levels.indexOf(level);
+
+    return currentLevelIndex >= minLevelIndex;
+  }
+
+  /**
+   * 在控制台输出日志
+   */
+  private consoleLog(entry: LogEntry): void {
+    const formattedTime = new Date(entry.timestamp).toLocaleTimeString();
+    const logPrefix = `[${formattedTime}] [${entry.level.toUpperCase()}] [${entry.tag}]:`;
+
+    switch (entry.level) {
+      case LogLevel.INFO:
+        console.info(logPrefix, entry.message, entry.data || '');
+        break;
+      case LogLevel.WARN:
+        console.warn(logPrefix, entry.message, entry.data || '');
+        break;
+      case LogLevel.ERROR:
+        console.error(logPrefix, entry.message, entry.data || '');
+        break;
+      case LogLevel.DEBUG:
+        console.debug(logPrefix, entry.message, entry.data || '');
+        break;
+    }
+  }
+
+  /**
+   * 发送日志到远程服务器
+   */
+  private async flushLogs(): Promise<void> {
+    if (this.logQueue.length === 0) return;
+
+    const logsToSend = [...this.logQueue];
+    this.logQueue = [];
+
+    if (this.config.remoteUrl) {
+      try {
+        // 使用 Fetch API 发送日志
+        await fetch(this.config.remoteUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            logs: logsToSend,
+            clientInfo: {
+              userAgent: navigator.userAgent,
+              timestamp: new Date().toISOString(),
+              sessionId: this.sessionId,
+            },
+          }),
+          // 使用 keepalive 确保页面关闭时也能发送请求
+          keepalive: true,
+        });
+      } catch (error) {
+        // 发送失败时，将日志重新添加到队列
+        if (this.config.enableConsole) {
+          console.error('Failed to send logs to server:', error);
+        }
+        // 只保留最近的日志，避免无限增长
+        this.logQueue = [...logsToSend.slice(-this.MAX_QUEUE_SIZE / 2), ...this.logQueue];
+      }
+    }
+  }
+
+  /**
+   * 更新日志配置
+   */
+  public updateConfig(config: Partial<LoggerConfig>): void {
+    this.config = { ...this.config, ...config };
+
+    // 更新远程日志发送间隔
+    if (this.flushInterval) {
+      clearInterval(this.flushInterval);
+      this.flushInterval = null;
     }
 
-    // 开发环境下输出到控制台
-    if (process.env.NODE_ENV === 'development') {
-      this.printToConsole(logEntry);
-    }
-
-    // 生产环境下可以发送到日志服务器
-    if (process.env.NODE_ENV === 'production' && this.apiEndpoint) {
-      this.sendToServer(logEntry);
-    }
-  }
-
-  /**
-   * 设置日志服务器地址
-   * @param endpoint 日志服务器API地址
-   */
-  public setApiEndpoint(endpoint: string): void {
-    this.apiEndpoint = endpoint;
-  }
-
-  /**
-   * 清空日志
-   */
-  public clearLogs(): void {
-    this.logs = [];
-  }
-
-  /**
-   * 获取所有日志
-   */
-  public getAllLogs(): LogEntry[] {
-    return [...this.logs];
-  }
-
-  /**
-   * 获取指定级别的日志
-   * @param level 日志级别
-   */
-  public getLogsByLevel(level: LogLevel): LogEntry[] {
-    return this.logs.filter(log => log.level === level);
-  }
-
-  /**
-   * 获取指定标签的日志
-   * @param tag 日志标签
-   */
-  public getLogsByTag(tag: string): LogEntry[] {
-    return this.logs.filter(log => log.tag === tag);
-  }
-
-  /**
-   * 将日志打印到控制台
-   */
-  private printToConsole(logEntry: LogEntry): void {
-    const { level, tag, message, data, timestamp } = logEntry;
-    const time = new Date(timestamp).toLocaleTimeString();
-    
-    const styles = {
-      info: 'color: #3498db; font-weight: bold;',
-      warn: 'color: #f39c12; font-weight: bold;',
-      error: 'color: #e74c3c; font-weight: bold;',
-    };
-    
-    console.group(`%c${level.toUpperCase()} [${tag}] - ${time}`, styles[level]);
-    console.log(message);
-    if (data !== undefined) {
-      console.log('数据:', data);
-    }
-    console.groupEnd();
-  }
-
-  /**
-   * 将日志发送到服务器（生产环境）
-   */
-  private sendToServer(logEntry: LogEntry): void {
-    if (!this.apiEndpoint) return;
-    
-    // 使用 navigator.sendBeacon 进行非阻塞日志上报
-    if (navigator.sendBeacon) {
-      const blob = new Blob([JSON.stringify(logEntry)], { type: 'application/json' });
-      navigator.sendBeacon(this.apiEndpoint, blob);
-    } else {
-      // 回退方案：使用 fetch API
-      fetch(this.apiEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logEntry),
-        // 使用 keepalive 确保页面卸载时请求仍能完成
-        keepalive: true,
-      }).catch(err => {
-        console.error('日志上传失败:', err);
-      });
+    if (this.config.enableRemote) {
+      this.flushInterval = window.setInterval(() => this.flushLogs(), 30000);
     }
   }
 }
 
-// 创建全局日志实例
+// 创建并导出日志实例
 export const logger = new Logger();
-
-// 导出类型定义
-export type { LogLevel, LogEntry }; 

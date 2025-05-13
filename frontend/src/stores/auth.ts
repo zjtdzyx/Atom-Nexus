@@ -1,8 +1,19 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { login, logout, refreshToken, register } from '../services/auth';
-import type { LoginResponse } from '../services/auth';
+import {
+  login,
+  logout,
+  refreshToken,
+  register,
+  verifyTwoFactor,
+  verifyDid,
+  verifyCredential,
+  type LoginResponse,
+  type DidVerificationResult,
+  type CredentialVerificationResult,
+} from '../services/auth';
 import router from '../router';
+import { logger } from '../utils/logger';
 
 interface User {
   id: string;
@@ -22,6 +33,8 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null);
   const twoFactorRequired = ref(false);
   const twoFactorToken = ref<string | null>(null);
+  const didVerificationResult = ref<DidVerificationResult | null>(null);
+  const credentialVerificationResult = ref<CredentialVerificationResult | null>(null);
 
   // 初始化时从本地存储加载用户数据
   const storedUser = localStorage.getItem('user');
@@ -29,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       user.value = JSON.parse(storedUser);
     } catch (err) {
-      console.error('无法解析存储的用户数据', err);
+      logger.error('Store:Auth', '无法解析存储的用户数据', err);
       localStorage.removeItem('user');
     }
   }
@@ -47,29 +60,58 @@ export const useAuthStore = defineStore('auth', () => {
     twoFactorToken.value = null;
 
     try {
-      const { data } = await login({ username, password, rememberMe });
+      logger.info('Store:Auth', '开始登录', { username, rememberMe });
 
-      // 检查是否需要两步验证
-      if (data.accessToken) {
-        // 正常登录成功
-        setAuthData(data);
-        router.push('/');
-      } else if (data.requireTwoFactor) {
-        // 需要两步验证
-        twoFactorRequired.value = true;
-        twoFactorToken.value = data.twoFactorToken;
+      // 尝试登录前先记录状态
+      const previousAuthState = isAuthenticated.value;
+      logger.debug('Store:Auth', `登录前认证状态: ${previousAuthState ? '已认证' : '未认证'}`);
+
+      // 发送登录请求
+      const loginData = await login({ username, password, rememberMe });
+      logger.debug('Store:Auth', '登录API响应', {
+        accessToken: loginData.accessToken ? '获取成功' : '未获取到',
+        user: loginData.user ? '获取成功' : '未获取到',
+      });
+
+      if (!loginData || !loginData.accessToken || !loginData.user) {
+        logger.error('Store:Auth', '登录响应无效', {
+          hasData: !!loginData,
+          hasToken: !!(loginData && loginData.accessToken),
+          hasUser: !!(loginData && loginData.user),
+        });
+        throw new Error('登录响应无效，请检查后端API');
       }
 
-      return data;
+      // 设置身份验证数据
+      setAuthData(loginData);
+      logger.info('Store:Auth', '登录成功', { username });
+
+      return loginData;
     } catch (err: any) {
-      error.value = err.response?.data?.message || '登录失败，请检查用户名和密码';
+      logger.error('Store:Auth', '登录失败', {
+        error: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+
+      // 设置错误消息
+      if (err.response?.status === 404) {
+        error.value = '服务器接口未找到，请检查API是否正确配置';
+      } else if (err.response?.status === 401) {
+        error.value = '用户名或密码错误';
+      } else if (err.response?.data?.message) {
+        error.value = err.response.data.message;
+      } else {
+        error.value = err.message || '登录失败，请稍后重试';
+      }
+
       throw err;
     } finally {
       loading.value = false;
     }
   };
 
-  const verifyTwoFactor = async (code: string) => {
+  const verifyTwoFactorAuth = async (code: string) => {
     if (!twoFactorToken.value) {
       error.value = '验证会话已过期，请重新登录';
       return;
@@ -79,14 +121,17 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
 
     try {
-      const { data } = await verifyTwoFactor(code, twoFactorToken.value);
-      setAuthData(data);
+      logger.info('Store:Auth', '开始验证两步验证码');
+      const result = await verifyTwoFactor(code, twoFactorToken.value);
+      setAuthData(result);
       twoFactorRequired.value = false;
       twoFactorToken.value = null;
+      logger.info('Store:Auth', '两步验证成功');
       router.push('/');
-      return data;
+      return result;
     } catch (err: any) {
       error.value = err.response?.data?.message || '验证码无效';
+      logger.error('Store:Auth', '两步验证失败', err);
       throw err;
     } finally {
       loading.value = false;
@@ -115,7 +160,8 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
 
     try {
-      const { data } = await register({
+      logger.info('Store:Auth', '开始注册', { username, email });
+      const result = await register({
         username,
         email,
         password,
@@ -123,10 +169,11 @@ export const useAuthStore = defineStore('auth', () => {
         fullName,
         agreeTerms,
       });
-
-      return data;
+      logger.info('Store:Auth', '注册成功', { username });
+      return result;
     } catch (err: any) {
       error.value = err.response?.data?.message || '注册失败，请稍后重试';
+      logger.error('Store:Auth', '注册失败', err);
       throw err;
     } finally {
       loading.value = false;
@@ -135,9 +182,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logoutUser = async () => {
     try {
+      logger.info('Store:Auth', '开始登出');
       await logout();
+      logger.info('Store:Auth', '登出成功');
     } catch (err) {
-      console.error('登出时发生错误', err);
+      logger.error('Store:Auth', '登出时发生错误', err);
     } finally {
       // 无论API调用是否成功，都清除本地认证数据
       clearAuthData();
@@ -152,14 +201,74 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     try {
-      const { data } = await refreshToken(refreshTokenValue.value);
-      accessToken.value = data.accessToken;
-      localStorage.setItem('accessToken', data.accessToken);
+      logger.info('Store:Auth', '开始刷新令牌');
+      const result = await refreshToken(refreshTokenValue.value);
+      accessToken.value = result.accessToken;
+      localStorage.setItem('accessToken', result.accessToken);
+      logger.info('Store:Auth', '令牌刷新成功');
 
       return true;
     } catch (err) {
+      logger.error('Store:Auth', '令牌刷新失败', err);
       clearAuthData();
       return false;
+    }
+  };
+
+  // 验证DID
+  const verifyDidDocument = async (
+    did: string,
+    method: 'resolve' | 'authenticate' | 'full' = 'resolve',
+    options?: Record<string, any>
+  ) => {
+    loading.value = true;
+    error.value = null;
+    didVerificationResult.value = null;
+
+    try {
+      logger.info('Store:Auth', '开始验证DID', { did, method });
+      const result = await verifyDid({ did, method, options });
+      didVerificationResult.value = result;
+      logger.info('Store:Auth', 'DID验证完成', { status: result.status });
+      return result;
+    } catch (err: any) {
+      error.value = err.response?.data?.message || 'DID验证失败';
+      logger.error('Store:Auth', 'DID验证失败', err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // 验证凭证
+  const verifyCredentialDocument = async (params: {
+    id?: string;
+    credential?: Record<string, any>;
+    proof: {
+      type: string;
+      signatureValue: string;
+      created?: string;
+      verificationMethod?: string;
+    };
+    checkRevocationStatus?: boolean;
+    verifyIssuer?: boolean;
+  }) => {
+    loading.value = true;
+    error.value = null;
+    credentialVerificationResult.value = null;
+
+    try {
+      logger.info('Store:Auth', '开始验证凭证', { id: params.id });
+      const result = await verifyCredential(params);
+      credentialVerificationResult.value = result;
+      logger.info('Store:Auth', '凭证验证完成', { status: result.status });
+      return result;
+    } catch (err: any) {
+      error.value = err.response?.data?.message || '凭证验证失败';
+      logger.error('Store:Auth', '凭证验证失败', err);
+      throw err;
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -192,6 +301,8 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     error,
     twoFactorRequired,
+    didVerificationResult,
+    credentialVerificationResult,
 
     // 计算属性
     isAuthenticated,
@@ -203,6 +314,8 @@ export const useAuthStore = defineStore('auth', () => {
     logoutUser,
     registerUser,
     refreshAuthToken,
-    verifyTwoFactor,
+    verifyTwoFactorAuth,
+    verifyDidDocument,
+    verifyCredentialDocument,
   };
 });

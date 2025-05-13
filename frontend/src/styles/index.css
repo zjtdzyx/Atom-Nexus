@@ -1,0 +1,36 @@
+/* 导入基础样式 */
+@import './global.css';
+
+/* 导入组件样式 */
+@import './components.css';
+
+/* 其他自定义样式 */
+body {
+  background-color: var(--color-primary);
+  font-family: var(--font-family);
+  color: var(--color-text-light);
+  overflow-x: hidden;
+}
+
+/* 全局背景原子效果 */
+#app::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 10% 10%, rgba(12, 255, 225, 0.05), transparent 60%),
+              radial-gradient(circle at 90% 90%, rgba(138, 43, 226, 0.05), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+  background: linear-gradient(to right, var(--color-neon), var(--color-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+} 

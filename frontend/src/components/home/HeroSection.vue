@@ -37,19 +37,85 @@
 </template>
 
 <script setup lang="ts">
-  // 无需额外逻辑
+  import { onMounted, onUnmounted } from 'vue';
+  import { logger } from '../../utils/logger';
+  
+  // 高性能动画标志
+  let animationActive = true;
+  let rafId: number | null = null;
+  
+  // 组件加载时初始化
+  onMounted(() => {
+    logger.info('Component:HeroSection', '英雄区域已加载');
+    
+    // 监听视口
+    setupIntersectionObserver();
+    
+    // 在视口内启动高性能动画
+    animateHeroElements();
+  });
+  
+  // 组件卸载时清理
+  onUnmounted(() => {
+    // 清理动画帧
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+    }
+    animationActive = false;
+  });
+  
+  // 使用交叉观察器优化性能 - 只有在视口内才进行动画
+  const setupIntersectionObserver = () => {
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          // 当组件进入视口时启动动画，离开时停止
+          animationActive = entry.isIntersecting;
+          
+          if (entry.isIntersecting && !rafId) {
+            animateHeroElements();
+          } else if (!entry.isIntersecting && rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      // 观察当前组件
+      const heroSection = document.querySelector('.hero-section');
+      if (heroSection) {
+        observer.observe(heroSection);
+      }
+    }
+  };
+  
+  // 高性能动画函数
+  const animateHeroElements = () => {
+    if (!animationActive) return;
+    
+    // 在这里可以添加任何需要平滑动画的逻辑
+    // 例如: 视差滚动效果、背景动画等
+    
+    // 循环动画帧
+    rafId = requestAnimationFrame(animateHeroElements);
+  };
 </script>
 
 <style scoped>
   .hero-section {
     min-height: 100vh;
     background-color: var(--color-primary);
+    will-change: transform; /* GPU加速 */
+    contain: content; /* 包含内部布局 */
   }
 
   .bg-gradient {
     background: linear-gradient(135deg, #1e1e2f 0%, #121212 100%);
     background-size: 200% 200%;
     animation: gradientFlow 15s ease infinite;
+    transform: translateZ(0); /* 强制GPU渲染 */
+    will-change: background-position;
+    backface-visibility: hidden;
   }
 
   /* 动画 */
@@ -68,7 +134,6 @@
   }
 
   @keyframes float {
-
     0%,
     100% {
       transform: translateY(0);
@@ -81,12 +146,14 @@
 
   .animate-float {
     animation: float 8s ease-in-out infinite;
+    will-change: transform;
   }
 
   .animate-slide-up {
     animation: slideUp 0.8s ease-out forwards;
     opacity: 0;
     transform: translateY(30px);
+    will-change: transform, opacity;
   }
 
   .animation-delay-200 {
@@ -101,6 +168,17 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+  
+  /* 移动端优化 - 减少动画数量 */
+  @media (max-width: 768px) {
+    .bg-gradient {
+      animation-duration: 30s; /* 降低动画频率 */
+    }
+    
+    .animate-float {
+      animation: none; /* 移动端禁用浮动动画 */
     }
   }
 </style>

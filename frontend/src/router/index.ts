@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import { logger } from '@/utils/logger';
+import { useAuthStore } from '@/stores/auth';
 
 // -- AUTO-IMPORT ROUTES START --
 // 这里会自动导入路由组件
@@ -258,6 +259,32 @@ router.beforeEach((to, from, next) => {
     document.title = `${to.meta.title} - Atom Nexus`;
   } else {
     document.title = 'Atom Nexus';
+  }
+
+  // 检查用户登录状态
+  if (to.meta.requiresAuth) {
+    const authStore = useAuthStore();
+
+    if (!authStore.isAuthenticated) {
+      logger.warn('Router', '访问受限页面需要登录', { path: to.path });
+
+      // 保存原始目标路径，以便登录后跳回
+      next({
+        path: '/auth/login',
+        query: { redirect: to.fullPath },
+      });
+      return;
+    }
+  }
+
+  // 如果用户已登录且访问的是登录页，则重定向到首页
+  if (
+    (to.path === '/auth/login' || to.path === '/auth/register') &&
+    useAuthStore().isAuthenticated
+  ) {
+    logger.info('Router', '已登录用户重定向到首页', { path: to.path });
+    next({ path: '/' });
+    return;
   }
 
   // 继续导航

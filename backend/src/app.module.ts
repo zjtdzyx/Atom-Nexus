@@ -9,6 +9,9 @@ import { DeveloperModule } from './modules/developer/developer.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { SecurityModule } from './modules/security/security.module';
+import { IdentityModule } from './modules/identity/identity.module';
+import { User } from './modules/auth/entities/user.entity';
+import { AuthLog } from './modules/auth/entities/auth-log.entity';
 
 @Module({
   imports: [
@@ -24,6 +27,7 @@ import { SecurityModule } from './modules/security/security.module';
       database: process.env.DB_DATABASE || 'atom_nexus',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // 生产环境中应设为false
+      autoLoadEntities: true, // 自动加载模块中注册的实体
     }),
     DidModule,
     CredentialModule,
@@ -33,6 +37,7 @@ import { SecurityModule } from './modules/security/security.module';
     AdminModule,
     StorageModule,
     SecurityModule,
+    IdentityModule,
   ],
   controllers: [],
   providers: [],

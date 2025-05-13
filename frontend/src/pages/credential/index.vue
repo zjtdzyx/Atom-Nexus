@@ -107,81 +107,9 @@
 
         <!-- 凭证卡片网格 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div v-for="credential in credentialStore.filteredCredentials" :key="credential.id"
-            class="credential-card card hover:bg-primary/30 hover:border-neon/50 transition-all duration-200 overflow-hidden">
-            <!-- 凭证卡片头部 -->
-            <div class="card-header relative">
-              <div class="credential-banner h-24 w-full bg-gradient-to-r from-violet/50 to-neon/50" :class="{
-                'from-green-500/30 to-green-500/10': credential.status === 'valid',
-                'from-yellow-500/30 to-yellow-500/10': credential.status === 'expired',
-                'from-red-500/30 to-red-500/10': credential.status === 'revoked'
-              }">
-                <div class="absolute top-3 right-3">
-                  <span class="px-2 py-1 text-xs rounded-full bg-primary/80" :class="{
-                    'text-green-500': credential.status === 'valid',
-                    'text-yellow-500': credential.status === 'expired',
-                    'text-red-500': credential.status === 'revoked'
-                  }">
-                    {{ credential.status === 'valid' ? '有效' : credential.status === 'expired' ? '已过期' : '已撤销' }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- 凭证图标/图片 -->
-              <div class="credential-icon absolute -bottom-8 left-6">
-                <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center border-4 border-primary">
-                  <span v-if="!credential.metadata?.image" class="i-carbon-certificate text-3xl text-neon"></span>
-                  <img v-else :src="credential.metadata.image" class="w-full h-full object-cover rounded-full"
-                    alt="凭证图标" />
-                </div>
-              </div>
-            </div>
-
-            <!-- 凭证内容 -->
-            <div class="card-content p-6 pt-10">
-              <h3 class="text-lg font-semibold text-textlight mb-1">
-                {{ credential.metadata?.name || getCredentialTypeName(credential) }}
-              </h3>
-              <p class="text-textgray text-sm mb-4">
-                由 {{ formatIssuer(credential.issuer) }} 颁发
-              </p>
-
-              <!-- 凭证详情 -->
-              <div class="mb-4">
-                <div class="text-xs text-textgray mb-1">凭证类型</div>
-                <div class="text-sm text-textlight">{{ getCredentialTypeName(credential) }}</div>
-              </div>
-
-              <div class="mb-4">
-                <div class="text-xs text-textgray mb-1">颁发日期</div>
-                <div class="text-sm text-textlight">{{ formatDate(credential.issuanceDate) }}</div>
-              </div>
-
-              <div v-if="credential.expirationDate" class="mb-4">
-                <div class="text-xs text-textgray mb-1">到期日期</div>
-                <div class="text-sm" :class="{
-                  'text-textlight': credential.status === 'valid',
-                  'text-yellow-500': credential.status === 'expired'
-                }">
-                  {{ formatDate(credential.expirationDate) }}
-                </div>
-              </div>
-
-              <!-- 凭证操作 -->
-              <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-700/50">
-                <router-link :to="`/credential/${credential.id}`" class="text-neon hover:underline text-sm">
-                  查看详情
-                </router-link>
-                <div class="flex gap-2">
-                  <button @click="shareCredential(credential)" class="text-textgray hover:text-neon p-1">
-                    <span class="i-carbon-share"></span>
-                  </button>
-                  <button @click="verifyCredential(credential)" class="text-textgray hover:text-neon p-1">
-                    <span class="i-carbon-certificate-check"></span>
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div v-for="credential in credentialStore.filteredCredentials" :key="credential.id">
+            <CredentialCard :credential="credential" @view-details="viewCredentialDetails(credential)"
+              @show-qr-code="showCredentialQRCode(credential)" />
           </div>
         </div>
       </template>
@@ -194,6 +122,7 @@
   import { useRouter } from 'vue-router';
   import { useCredentialStore, type Credential } from '../../stores/credential';
   import { logger } from '../../utils/logger';
+  import CredentialCard from '../../components/credential/CredentialCard.vue';
 
   // 初始化路由和存储
   const router = useRouter();
@@ -290,17 +219,16 @@
     return statusMap[status] || status;
   };
 
-  // 分享凭证
-  const shareCredential = (credential: Credential) => {
-    logger.info('Page:Credential', '分享凭证', { id: credential.id });
-    // 实现分享逻辑（将在后续开发）
-    alert('分享功能开发中...');
+  // 查看凭证详情
+  const viewCredentialDetails = (credential: Credential) => {
+    logger.info('Page:Credential', '查看凭证详情', { id: credential.id });
+    router.push(`/credential/${credential.id}`);
   };
 
-  // 验证凭证
-  const verifyCredential = (credential: Credential) => {
-    logger.info('Page:Credential', '验证凭证', { id: credential.id });
-    router.push(`/credential/verify?id=${credential.id}`);
+  // 显示凭证二维码
+  const showCredentialQRCode = (credential: Credential) => {
+    logger.info('Page:Credential', '显示凭证二维码', { id: credential.id });
+    router.push(`/credential/${credential.id}?showQr=true`);
   };
 
   // 导航到颁发页面
@@ -313,40 +241,6 @@
   const navigateToVerify = () => {
     logger.info('Page:Credential', '导航到验证凭证页面');
     router.push('/credential/verify');
-  };
-
-  // 格式化日期
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return '永久有效';
-
-    const date = new Date(dateString);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  // 格式化发行者
-  const formatIssuer = (issuer: string): string => {
-    // 如果是DID，提取最后一部分
-    if (issuer.startsWith('did:')) {
-      const parts = issuer.split(':');
-      // 返回前10个字符+...
-      return `${parts[0]}:${parts[1]}:${parts[2].substring(0, 10)}...`;
-    }
-    return issuer;
-  };
-
-  // 获取凭证类型名称
-  const getCredentialTypeName = (credential: Credential): string => {
-    // 取最后一个类型作为主类型（跳过 VerifiableCredential）
-    const types = credential.type.filter(t => t !== 'VerifiableCredential');
-    if (types.length === 0) return 'VerifiableCredential';
-
-    // 从完整类型URI中提取类型名
-    const lastType = types[types.length - 1];
-    return lastType.split('/').pop()?.split('#').pop() || lastType;
   };
 </script>
 
