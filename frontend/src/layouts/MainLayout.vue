@@ -22,64 +22,6 @@
       <router-view></router-view>
     </main>
 
-    <!-- 页脚 -->
-    <footer class="footer py-12 bg-primary/95 border-t border-neon/10 relative overflow-hidden">
-      <div class="container">
-        <!-- Logo & 简介 -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          <div class="col-span-1 md:col-span-1">
-            <div class="flex items-center mb-4">
-              <div class="atom-logo relative w-8 h-8 mr-2">
-                <div class="atom-core"></div>
-                <div class="atom-orbit-1"></div>
-                <div class="atom-orbit-2"></div>
-              </div>
-              <span class="text-xl font-bold gradient-text">Atom Nexus</span>
-            </div>
-
-          </div>
-
-          <!-- 链接 -->
-          <div class="col-span-1">
-            <h3 class="text-lg font-semibold text-textlight mb-4">产品</h3>
-            <ul class="space-y-2">
-              <li><router-link to="/identity" class="text-textgray hover:text-neon text-sm">身份管理</router-link></li>
-              <li><router-link to="/credential" class="text-textgray hover:text-neon text-sm">凭证管理</router-link></li>
-              <li><router-link to="/permission" class="text-textgray hover:text-neon text-sm">权限存储</router-link></li>
-              <li><router-link to="/apps" class="text-textgray hover:text-neon text-sm">应用集成</router-link></li>
-            </ul>
-          </div>
-
-          <div class="col-span-1">
-            <h3 class="text-lg font-semibold text-textlight mb-4">开发者</h3>
-            <ul class="space-y-2">
-              <li><router-link to="/developer" class="text-textgray hover:text-neon text-sm">开发者中心</router-link></li>
-              <li><a href="#" class="text-textgray hover:text-neon text-sm">API 文档</a></li>
-              <li><a href="#" class="text-textgray hover:text-neon text-sm">SDK 下载</a></li>
-              <li><a href="#" class="text-textgray hover:text-neon text-sm">示例项目</a></li>
-            </ul>
-          </div>
-
-          <div class="col-span-1">
-            <h3 class="text-lg font-semibold text-textlight mb-4">公司</h3>
-            <ul class="space-y-2">
-              <li><router-link to="/about" class="text-textgray hover:text-neon text-sm">关于我们</router-link></li>
-              <li><router-link to="/contact" class="text-textgray hover:text-neon text-sm">联系我们</router-link></li>
-              <li><router-link to="/privacy" class="text-textgray hover:text-neon text-sm">隐私政策</router-link></li>
-              <li><router-link to="/terms" class="text-textgray hover:text-neon text-sm">服务条款</router-link></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- 底部装饰线 -->
-        <div class="decoration-line mb-6"></div>
-
-        <!-- 版权 -->
-        <div class="pt-6 text-sm text-textgray text-center">
-          <p>© {{ new Date().getFullYear() }} Atom Nexus. 保留所有权利。</p>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
