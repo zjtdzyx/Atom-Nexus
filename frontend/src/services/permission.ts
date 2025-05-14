@@ -18,32 +18,32 @@ interface PermissionCheckResult {
 export const permissionService = {
   // 获取所有权限
   getPermissions(params?: any): Promise<ApiResponse<Permission[]>> {
-    return http.get('/api/permissions', { params });
+    return http.get('/permissions', { params });
   },
 
   // 获取单个权限详情
   getPermissionById(id: string): Promise<ApiResponse<Permission>> {
-    return http.get(`/api/permissions/${id}`);
+    return http.get(`/permissions/${id}`);
   },
 
   // 创建新权限
   createPermission(data: Partial<Permission>): Promise<ApiResponse<Permission>> {
-    return http.post('/api/permissions', data);
+    return http.post('/permissions', data);
   },
 
   // 更新权限
   updatePermission(id: string, data: Partial<Permission>): Promise<ApiResponse<Permission>> {
-    return http.put(`/api/permissions/${id}`, data);
+    return http.put(`/permissions/${id}`, data);
   },
 
   // 撤销权限
   revokePermission(id: string, reason?: string): Promise<ApiResponse<void>> {
-    return http.post(`/api/permissions/${id}/revoke`, { reason });
+    return http.post(`/permissions/${id}/revoke`, { reason });
   },
 
   // 删除权限
   deletePermission(id: string): Promise<ApiResponse<void>> {
-    return http.delete(`/api/permissions/${id}`);
+    return http.delete(`/permissions/${id}`);
   },
 
   // 获取资源的权限列表
@@ -51,14 +51,14 @@ export const permissionService = {
     resourceType: 'credential' | 'identity' | 'data',
     resourceId: string
   ): Promise<ApiResponse<Permission[]>> {
-    return http.get('/api/permissions', {
+    return http.get('/permissions', {
       params: { resourceType, resourceId },
     });
   },
 
   // 获取DID相关权限
   getDidPermissions(did: string): Promise<ApiResponse<Permission[]>> {
-    return http.get(`/api/permissions/${did}`);
+    return http.get(`/permissions/${did}`);
   },
 
   // 验证权限
@@ -68,12 +68,12 @@ export const permissionService = {
     resourceId: string;
     action: string;
   }): Promise<ApiResponse<PermissionCheckResult>> {
-    return http.post('/api/permissions/check', params);
+    return http.post('/permissions/check', params);
   },
 
   // 获取审计日志
   getAuditLogs(params?: any): Promise<ApiResponse<AuditLog[]>> {
-    return http.get('/api/permissions/audit', { params });
+    return http.get('/permissions/audit', { params });
   },
 
   // 获取资源的审计日志
@@ -109,6 +109,6 @@ export const permissionService = {
 
   // 设置凭证访问权限
   setPermission(data: any): Promise<ApiResponse<any>> {
-    return http.post('/api/permissions/set', data);
+    return http.post('/permissions/set', data);
   },
 };

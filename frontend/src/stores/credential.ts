@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { logger } from '../utils/logger';
-import { http } from '../utils/http';
+import { credentialService } from '../services/credential';
 
 // 凭证状态枚举
 export enum CredentialStatus {
@@ -169,8 +169,8 @@ export const useCredentialStore = defineStore('credential', {
       logger.info('Store:Credential', '开始获取凭证列表');
 
       try {
-        const response = await http.get<Credential[]>('/api/credential');
-        this.credentials = response;
+        const response = await credentialService.getCredentials();
+        this.credentials = response.data;
 
         logger.info('Store:Credential', '获取凭证列表成功', {
           count: this.credentials.length,
@@ -193,11 +193,11 @@ export const useCredentialStore = defineStore('credential', {
       logger.info('Store:Credential', '开始获取凭证详情', { id });
 
       try {
-        const response = await http.get<Credential>(`/api/credential/${id}`);
-        this.currentCredential = response;
+        const response = await credentialService.getCredentialById(id);
+        this.currentCredential = response.data;
 
         logger.info('Store:Credential', '获取凭证详情成功', { id });
-        return response;
+        return response.data;
       } catch (error: any) {
         this.error = error.message || '获取凭证详情失败';
         logger.error('Store:Credential', '获取凭证详情失败', {
@@ -218,12 +218,12 @@ export const useCredentialStore = defineStore('credential', {
       logger.info('Store:Credential', '开始验证凭证', { id });
 
       try {
-        const response = await http.post<VerifyResult>(`/api/credential/verify/${id}`);
+        const response = await credentialService.verifyCredentialById(id);
         logger.info('Store:Credential', '验证凭证成功', {
           id,
-          isValid: response.isValid,
+          isValid: response.data.isValid,
         });
-        return response;
+        return response.data;
       } catch (error: any) {
         this.error = error.message || '验证凭证失败';
         logger.error('Store:Credential', '验证凭证失败', {
@@ -244,11 +244,11 @@ export const useCredentialStore = defineStore('credential', {
       logger.info('Store:Credential', '开始验证凭证JSON');
 
       try {
-        const response = await http.post<VerifyResult>('/api/credential/verify', credentialData);
+        const response = await credentialService.verifyCredentialJson(credentialData);
         logger.info('Store:Credential', '验证凭证JSON成功', {
-          isValid: response.isValid,
+          isValid: response.data.isValid,
         });
-        return response;
+        return response.data;
       } catch (error: any) {
         this.error = error.message || '验证凭证JSON失败';
         logger.error('Store:Credential', '验证凭证JSON失败', {
@@ -268,7 +268,7 @@ export const useCredentialStore = defineStore('credential', {
       logger.info('Store:Credential', '开始撤销凭证', { id, reason });
 
       try {
-        const response = await http.post(`/api/credential/revoke/${id}`, { reason });
+        const response = await credentialService.revokeCredential(id, reason);
 
         // 更新本地凭证状态
         const index = this.credentials.findIndex((c) => c.id === id);
@@ -281,7 +281,7 @@ export const useCredentialStore = defineStore('credential', {
         }
 
         logger.info('Store:Credential', '撤销凭证成功', { id });
-        return response;
+        return response.data;
       } catch (error: any) {
         this.error = error.message || '撤销凭证失败';
         logger.error('Store:Credential', '撤销凭证失败', {

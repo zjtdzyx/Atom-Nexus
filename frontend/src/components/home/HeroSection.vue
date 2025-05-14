@@ -12,7 +12,7 @@
     </div>
 
     <!-- 主要内容 -->
-    <div class="container relative z-10 min-h-[90vh] flex flex-col justify-center items-start pt-20">
+    <div class="container relative z-10 min-h-[90vh] flex flex-col justify-center items-start pt-20 m-20"> 
       <h1
         class="text-5xl md:text-6xl lg:text-7xl font-bold text-textlight max-w-3xl mb-6 animate-slide-up leading-tight">
         重构身份，赋能<span class="text-neon">去中心化</span>世界

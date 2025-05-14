@@ -17,7 +17,7 @@ export const credentialService = {
    * @param params 查询参数
    */
   getCredentials(params?: any): Promise<ApiResponse<Credential[]>> {
-    return http.get('/api/credentials', { params });
+    return http.get('/credentials', { params });
   },
 
   /**
@@ -25,31 +25,23 @@ export const credentialService = {
    * @param id 凭证ID
    */
   getCredentialById(id: string): Promise<ApiResponse<Credential>> {
-    return http.get(`/api/credentials/${id}`);
+    return http.get(`/credentials/${id}`);
   },
 
   /**
-   * 颁发新凭证
-   * @param data 凭证数据
-   */
-  issueCredential(data: any): Promise<ApiResponse<Credential>> {
-    return http.post('/api/credentials/issue', data);
-  },
-
-  /**
-   * 验证凭证
+   * 验证凭证有效性
    * @param id 凭证ID
    */
-  verifyCredential(id: string): Promise<ApiResponse<VerifyResult>> {
-    return http.post(`/api/credentials/${id}/verify`);
+  verifyCredentialById(id: string): Promise<ApiResponse<VerifyResult>> {
+    return http.post(`/credentials/verify/${id}`);
   },
 
   /**
-   * 验证凭证（通过上传JSON）
-   * @param credentialJson 凭证JSON
+   * 验证凭证JSON
+   * @param credentialData 凭证数据
    */
-  verifyCredentialJson(credentialJson: any): Promise<ApiResponse<VerifyResult>> {
-    return http.post('/api/credentials/verify', { credential: credentialJson });
+  verifyCredentialJson(credentialData: any): Promise<ApiResponse<VerifyResult>> {
+    return http.post('/credentials/verify', credentialData);
   },
 
   /**
@@ -57,16 +49,24 @@ export const credentialService = {
    * @param id 凭证ID
    * @param reason 撤销原因
    */
-  revokeCredential(id: string, reason?: string): Promise<ApiResponse<void>> {
-    return http.post(`/api/credentials/${id}/revoke`, { reason });
+  revokeCredential(id: string, reason?: string): Promise<ApiResponse<any>> {
+    return http.post(`/credentials/${id}/revoke`, { reason });
   },
 
   /**
-   * 删除凭证（从本地存储中）
+   * 颁发新凭证
+   * @param data 凭证数据
+   */
+  issueCredential(data: any): Promise<ApiResponse<Credential>> {
+    return http.post('/credentials/issue', data);
+  },
+
+  /**
+   * 生成凭证分享链接或二维码
    * @param id 凭证ID
    */
-  deleteCredential(id: string): Promise<ApiResponse<void>> {
-    return http.delete(`/api/credentials/${id}`);
+  shareCredential(id: string): Promise<ApiResponse<any>> {
+    return http.post(`/credentials/${id}/share`);
   },
 
   /**

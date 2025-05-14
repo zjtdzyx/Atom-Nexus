@@ -73,8 +73,8 @@
         <!-- 使用PermissionCard组件展示权限 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="permission in filteredPermissions" :key="permission.id">
-            <PermissionCard :permission="permission" @view-details="viewDetails(permission)"
-              @edit="openEditModal(permission)" @revoke="confirmRevoke(permission)" />
+            <PermissionCard :permission="permission" @view-details="viewDetails" @edit="openEditModal"
+              @revoke="confirmRevoke" />
           </div>
         </div>
       </template>
@@ -88,95 +88,11 @@
           <h3 class="text-xl font-semibold text-textlight">{{ editingPermission ? '编辑权限' : '创建新权限' }}</h3>
         </div>
         <div class="modal-body p-6">
-          <form @submit.prevent="savePermission">
-            <!-- 资源类型选择 -->
-            <div class="mb-4">
-              <label class="block text-textlight mb-2">资源类型</label>
-              <select v-model="permissionForm.type" class="input w-full" :disabled="!!editingPermission"
-                @change="onResourceTypeChange">
-                <option value="credential">凭证</option>
-                <option value="identity">身份</option>
-                <option value="data">数据</option>
-              </select>
-            </div>
-
-            <!-- 资源ID -->
-            <div class="mb-4">
-              <label class="block text-textlight mb-2">资源ID</label>
-              <input v-model="permissionForm.resourceId" type="text" class="input w-full"
-                :disabled="!!editingPermission" :placeholder="`选择要授权的${getResourceTypeLabel(permissionForm.type)}`">
-              <p v-if="formErrors.resourceId" class="text-red-500 text-xs mt-1">{{ formErrors.resourceId }}</p>
-            </div>
-
-            <!-- 授权对象 -->
-            <div class="mb-4">
-              <label class="block text-textlight mb-2">授权对象 (DID)</label>
-              <input v-model="permissionForm.subject" type="text" class="input w-full" placeholder="did:example:123...">
-              <p v-if="formErrors.subject" class="text-red-500 text-xs mt-1">{{ formErrors.subject }}</p>
-            </div>
-
-            <!-- 操作类型 -->
-            <div class="mb-4">
-              <label class="block text-textlight mb-2">操作类型</label>
-              <select v-model="permissionForm.action" class="input w-full">
-                <option value="read">读取</option>
-                <option value="write">修改</option>
-                <option value="verify">验证</option>
-                <option value="revoke">撤销</option>
-                <option value="admin">管理员</option>
-              </select>
-            </div>
-
-            <!-- 有效期设置 -->
-            <div class="mb-4">
-              <label class="block text-textlight mb-2">有效期</label>
-              <div class="flex items-center mb-2">
-                <input type="checkbox" id="expireCheckbox" v-model="hasExpiration" class="mr-2">
-                <label for="expireCheckbox" class="text-textgray">设置过期时间</label>
-              </div>
-              <input v-if="hasExpiration" v-model="permissionForm.expiresAt" type="datetime-local" class="input w-full">
-            </div>
-
-            <!-- 高级选项 -->
-            <div class="mb-6">
-              <div class="flex items-center mb-2">
-                <span class="text-textlight">高级选项</span>
-                <button type="button" @click="showAdvanced = !showAdvanced" class="ml-2 text-textgray">
-                  <span :class="showAdvanced ? 'i-carbon-chevron-up' : 'i-carbon-chevron-down'"></span>
-                </button>
-              </div>
-
-              <div v-if="showAdvanced" class="bg-darkbg/30 p-4 rounded-lg">
-                <!-- IP限制 -->
-                <div class="mb-4">
-                  <label class="block text-textlight mb-2">IP限制 (可选)</label>
-                  <input v-model="permissionForm.ipRestriction" type="text" class="input w-full"
-                    placeholder="192.168.1.1, 10.0.0.0/24">
-                </div>
-
-                <!-- 域名限制 -->
-                <div class="mb-4">
-                  <label class="block text-textlight mb-2">域名限制 (可选)</label>
-                  <input v-model="permissionForm.domainRestriction" type="text" class="input w-full"
-                    placeholder="example.com, *.example.org">
-                </div>
-
-                <!-- 一次性使用 -->
-                <div class="flex items-center">
-                  <input type="checkbox" id="oneTimeCheckbox" v-model="permissionForm.oneTime" class="mr-2">
-                  <label for="oneTimeCheckbox" class="text-textgray">一次性使用 (使用后自动撤销)</label>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-end space-x-4">
-              <button type="button" class="btn-secondary" @click="closeModal">取消</button>
-              <button type="submit" class="btn-primary" :disabled="isSaving">
-                <span v-if="isSaving" class="i-carbon-circle-dash animate-spin mr-2"></span>
-                {{ editingPermission ? '保存修改' : '创建权限' }}
-              </button>
-            </div>
-          </form>
+          <PermissionForm :pre-selected-credential-id="editingPermission?.resourceId"
+            :pre-selected-did="editingPermission?.subject" @success="onPermissionSuccess" @error="onPermissionError" />
+          <div class="flex justify-end space-x-4 mt-6">
+            <button type="button" class="btn-secondary" @click="closeModal">取消</button>
+          </div>
         </div>
       </div>
     </div>
@@ -541,6 +457,19 @@
   // 获取资源名称
   const getResourceName = (permission: Permission): string => {
     return permission.metadata?.name || getResourceTypeLabel(permission.type);
+  };
+
+  // 处理权限表单成功
+  const onPermissionSuccess = (data: any) => {
+    logger.info('Page:Permission', '权限设置成功', { data });
+    closeModal();
+    fetchPermissions(); // 刷新权限列表
+  };
+
+  // 处理权限表单错误
+  const onPermissionError = (message: string) => {
+    logger.error('Page:Permission', '权限设置失败', { message });
+    // 可以显示错误提示，但模态框保持打开，让用户修正
   };
 </script>
 
