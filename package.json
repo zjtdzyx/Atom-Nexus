@@ -16,9 +16,13 @@
     "lint": "pnpm -r run lint",
     "format": "pnpm -r run format",
     "clean": "powershell -File ./clean.ps1",
+    "build:clean": "pnpm clean && mkdir -p dist && pnpm build:sdk && pnpm build:contracts && pnpm build:backend && pnpm build:frontend",
     "dev:frontend": "pnpm --filter atom-nexus-frontend dev",
     "dev:backend": "pnpm --filter atom-nexus-backend start:dev",
+    "build:frontend": "pnpm --filter atom-nexus-frontend build",
+    "build:backend": "pnpm --filter atom-nexus-backend build",
     "build:sdk": "pnpm --filter @atom-nexus/sdk build",
+    "build:contracts": "pnpm --filter atom-nexus-smart-contracts build",
     "compile:contracts": "pnpm --filter atom-nexus-smart-contracts compile",
     "dev:all": "pnpm -r --parallel run dev"
   },

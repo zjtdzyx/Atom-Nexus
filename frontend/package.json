@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "format": "prettier --write \"src/**/*.{ts,vue,css,html}\"",
-    "clean": "rimraf dist && rimraf vite.config.js vite.config.js.map"
+    "clean": "rimraf ../dist/frontend && rimraf vite.config.d.ts vite.config.js vite.config.js.map uno.config.d.ts uno.config.js uno.config.js.map"
   },
   "dependencies": {
     "vue": "^3.4.0",

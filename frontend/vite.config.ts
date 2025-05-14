@@ -32,9 +32,11 @@ export default defineConfig({
       },
     },
   },
-  // 添加sourcemap支持
+  // 修改构建输出目录到项目根目录的dist/frontend
   build: {
     sourcemap: true,
+    outDir: path.resolve(__dirname, '../dist/frontend'),
+    emptyOutDir: true,
   },
   // 开发模式下也启用sourcemap
   css: {

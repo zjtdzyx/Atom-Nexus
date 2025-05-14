@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "compile": "hardhat compile",
+    "build": "hardhat compile && mkdir -p ../dist/smart-contracts && cp -r artifacts typechain-types ../dist/smart-contracts/",
     "deploy": "hardhat deploy",
     "test": "hardhat test",
-    "clean": "hardhat clean && rimraf artifacts cache typechain typechain-types",
+    "clean": "hardhat clean && rimraf ../dist/smart-contracts artifacts cache typechain typechain-types",
     "lint": "eslint '**/*.{js,ts}'",
     "format": "prettier --write '**/*.{js,ts,sol}'",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network testnet",
