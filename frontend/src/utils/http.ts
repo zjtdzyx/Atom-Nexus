@@ -17,6 +17,11 @@ const http = axios.create({
 // 请求拦截器
 http.interceptors.request.use(
   (config) => {
+    // 确保API路径前缀正确
+    if (config.url && !config.url.startsWith('/api/')) {
+      config.url = `/api${config.url}`;
+    }
+
     // 详细的请求日志，包括完整URL
     const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
     logger.info('API:Request', `开始请求: ${config.method?.toUpperCase()} ${fullUrl}`, {

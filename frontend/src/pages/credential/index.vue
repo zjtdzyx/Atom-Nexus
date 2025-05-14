@@ -108,8 +108,8 @@
         <!-- 凭证卡片网格 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div v-for="credential in credentialStore.filteredCredentials" :key="credential.id">
-            <CredentialCard :credential="credential" @view-details="viewCredentialDetails(credential)"
-              @show-qr-code="showCredentialQRCode(credential)" />
+            <CredentialCard :credential="credential" @view-details="viewCredentialDetails"
+              @show-qr-code="showCredentialQRCode" />
           </div>
         </div>
       </template>

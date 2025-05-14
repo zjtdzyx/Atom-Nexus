@@ -181,24 +181,31 @@ export const usePermissionStore = defineStore('permission', {
       }
     },
 
-    // 删除权限
-    async deletePermission(id: string) {
-      logger.info('Store:Permission', '开始删除权限', { id });
+    // 设置权限
+    async setPermission(data: any) {
+      logger.info('Store:Permission', '开始设置权限', { data });
 
       try {
-        await permissionService.deletePermission(id);
-
-        // 从状态中移除权限
-        this.permissions = this.permissions.filter((permission) => permission.id !== id);
-
-        // 如果是当前选中的权限，清除currentPermission
-        if (this.currentPermission && this.currentPermission.id === id) {
-          this.currentPermission = null;
-        }
-
-        logger.info('Store:Permission', '权限删除成功', { id });
+        const response = await permissionService.setPermission(data);
+        logger.info('Store:Permission', '权限设置成功');
+        return response.data;
       } catch (err: any) {
-        logger.error('Store:Permission', '删除权限失败', { id, error: err });
+        logger.error('Store:Permission', '权限设置失败', { error: err });
+        throw err;
+      }
+    },
+
+    // 获取审计日志
+    async fetchAuditLogs(params?: any) {
+      logger.info('Store:Permission', '获取审计日志', { params });
+
+      try {
+        const response = await permissionService.getAuditLogs(params);
+        this.auditLogs = response.data;
+        logger.info('Store:Permission', '审计日志获取成功', { count: response.data.length });
+        return response.data;
+      } catch (err: any) {
+        logger.error('Store:Permission', '获取审计日志失败', { error: err });
         throw err;
       }
     },
@@ -252,25 +259,6 @@ export const usePermissionStore = defineStore('permission', {
       } catch (err: any) {
         logger.error('Store:Permission', '权限验证失败', { error: err });
         throw err;
-      }
-    },
-
-    // 获取审计日志
-    async fetchAuditLogs(params?: any) {
-      this.isLoading = true;
-      this.error = null;
-
-      logger.info('Store:Permission', '获取审计日志', { params });
-
-      try {
-        const response = await permissionService.getAuditLogs(params);
-        this.auditLogs = response.data;
-        logger.info('Store:Permission', '审计日志获取成功', { count: response.data.length });
-      } catch (err: any) {
-        this.error = err.message || '获取审计日志失败';
-        logger.error('Store:Permission', '获取审计日志失败', { error: err });
-      } finally {
-        this.isLoading = false;
       }
     },
 
